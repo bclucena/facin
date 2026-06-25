@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -73,7 +73,7 @@ export function FluxoView({ entries, defaultMonth }: { entries: CashEntry[]; def
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const form = useForm<EntryForm>({
-    resolver: zodResolver(entrySchema),
+    resolver: zodResolver(entrySchema) as Resolver<EntryForm>,
     defaultValues: { description: "", amount: 0, type: "CREDIT", accountCode: "", referenceDate: new Date().toISOString().slice(0,10) },
   });
 
@@ -154,7 +154,7 @@ export function FluxoView({ entries, defaultMonth }: { entries: CashEntry[]; def
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis tickFormatter={BRLAxis} tick={{ fontSize: 11 }} width={56} />
-                <Tooltip formatter={(v: number) => fmt(v)} />
+                <Tooltip formatter={(v) => fmt(Number(v))} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="Entradas" fill="#15803d" radius={[3, 3, 0, 0]} />
                 <Bar dataKey="Saídas"   fill="#dc2626" radius={[3, 3, 0, 0]} />

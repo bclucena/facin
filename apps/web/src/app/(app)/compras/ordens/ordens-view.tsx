@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -99,7 +99,7 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes }
   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   // --- Criar OC form ---
-  const createForm = useForm<CreateValues>({ resolver: zodResolver(createSchema), defaultValues: DEFAULT_CREATE });
+  const createForm = useForm<CreateValues>({ resolver: zodResolver(createSchema) as Resolver<CreateValues>, defaultValues: DEFAULT_CREATE });
   const { fields, append, remove } = useFieldArray({ control: createForm.control, name: "items" });
   const watchItems = createForm.watch("items");
   const rowTotal = (i: number) => (Number(watchItems[i]?.quantity) || 0) * (Number(watchItems[i]?.unitCost) || 0);
@@ -141,7 +141,7 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes }
 
   // --- Receber NF form ---
   const receberForm = useForm<ReceberValues>({
-    resolver: zodResolver(receberSchema),
+    resolver: zodResolver(receberSchema) as Resolver<ReceberValues>,
     defaultValues: { nfNumber: "", nfDate: today, nfAmount: 0, warehouseId: "", dueDate: "", receivedQtys: [] },
   });
 

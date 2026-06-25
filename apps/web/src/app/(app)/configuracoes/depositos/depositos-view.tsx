@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -41,7 +41,7 @@ export function DepositosView({ depositos }: { depositos: DepositoRow[] }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<DepositoRow | null>(null);
 
-  const form = useForm<DepositoForm>({ resolver: zodResolver(schema), defaultValues: { nome: "", ativo: true } });
+  const form = useForm<DepositoForm>({ resolver: zodResolver(schema) as Resolver<DepositoForm>, defaultValues: { nome: "", ativo: true } });
 
   const filtered = depositos.filter((d) => d.nome.toLowerCase().includes(search.toLowerCase()));
 

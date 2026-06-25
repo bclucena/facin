@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -67,7 +67,7 @@ export function ProdutosView({ produtos }: { produtos: ProdutoRow[] }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<ProdutoRow | null>(null);
 
-  const form = useForm<ProdutoForm>({ resolver: zodResolver(schema), defaultValues: DEFAULT });
+  const form = useForm<ProdutoForm>({ resolver: zodResolver(schema) as Resolver<ProdutoForm>, defaultValues: DEFAULT });
 
   const filtered = produtos.filter(
     (p) =>

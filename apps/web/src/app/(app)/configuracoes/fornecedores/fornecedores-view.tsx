@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -68,7 +68,7 @@ export function FornecedoresView({ fornecedores }: { fornecedores: FornecedorRow
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<FornecedorRow | null>(null);
 
-  const form = useForm<FornecedorForm>({ resolver: zodResolver(schema), defaultValues: DEFAULT });
+  const form = useForm<FornecedorForm>({ resolver: zodResolver(schema) as Resolver<FornecedorForm>, defaultValues: DEFAULT });
 
   const filtered = fornecedores.filter(
     (f) => f.nome.toLowerCase().includes(search.toLowerCase()) || f.cnpj.includes(search)

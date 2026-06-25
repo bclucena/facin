@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -92,7 +92,7 @@ export function ClientesView({ clientes }: { clientes: ClienteRow[] }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<ClienteRow | null>(null);
 
-  const form = useForm<ClienteForm>({ resolver: zodResolver(schema), defaultValues: DEFAULT });
+  const form = useForm<ClienteForm>({ resolver: zodResolver(schema) as Resolver<ClienteForm>, defaultValues: DEFAULT });
 
   const filtered = clientes.filter(
     (c) =>

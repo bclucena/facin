@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
+import { useForm, useFieldArray, Controller, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -52,7 +52,7 @@ const DEFAULT: FormValues = {
 export function NovoPedidoView({ clientes, produtos }: { clientes: ClienteOption[]; produtos: ProdutoOption[] }) {
   const router = useRouter();
 
-  const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: DEFAULT });
+  const form = useForm<FormValues>({ resolver: zodResolver(schema) as Resolver<FormValues>, defaultValues: DEFAULT });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "items" });
 
   // useWatch para recalcular totais reativamente

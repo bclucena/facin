@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -69,7 +69,7 @@ export function CotacoesView({ quotes, fornecedores, produtos }: { quotes: Quote
   const [isPending, startTransition] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: DEFAULT });
+  const form = useForm<FormValues>({ resolver: zodResolver(schema) as Resolver<FormValues>, defaultValues: DEFAULT });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "items" });
   const watchItems = form.watch("items");
 

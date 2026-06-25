@@ -142,7 +142,9 @@ export function EstoqueView({ balances, depositos }: { balances: StockRow[]; dep
                     <div className="flex items-center gap-2">
                       {b.productName}
                       {lowStock && (
-                        <AlertTriangle size={13} className="text-red-500 flex-shrink-0" title={`Mínimo: ${b.productMinStock} ${b.productUnit}`} />
+                        <span title={`Mínimo: ${b.productMinStock} ${b.productUnit}`}>
+                          <AlertTriangle size={13} className="text-red-500 flex-shrink-0" />
+                        </span>
                       )}
                       {nearExpiry && !lowStock && (
                         <Clock size={13} className={expired ? "text-red-500" : "text-amber-500"} />

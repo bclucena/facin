@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -90,8 +90,8 @@ export function ContasReceberView({ bills, clientes }: { bills: BillRow[]; clien
   const [filterTo, setFilterTo] = useState("");
   const [search, setSearch] = useState("");
 
-  const billForm = useForm<BillForm>({ resolver: zodResolver(billSchema), defaultValues: { clientName: "", description: "", amount: 0, dueDate: "", notes: "" } });
-  const baixaForm = useForm<BaixaForm>({ resolver: zodResolver(baixaSchema), defaultValues: { receivedAt: new Date().toISOString().slice(0,10), receivedAmount: 0, paymentType: "PIX" } });
+  const billForm = useForm<BillForm>({ resolver: zodResolver(billSchema) as Resolver<BillForm>, defaultValues: { clientName: "", description: "", amount: 0, dueDate: "", notes: "" } });
+  const baixaForm = useForm<BaixaForm>({ resolver: zodResolver(baixaSchema) as Resolver<BaixaForm>, defaultValues: { receivedAt: new Date().toISOString().slice(0,10), receivedAmount: 0, paymentType: "PIX" } });
 
   function openCreate() {
     setEditing(null);

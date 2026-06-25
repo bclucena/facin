@@ -20,12 +20,13 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
 
 type NavChild = { href: string; label: string };
 type NavItem = {
   href: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: LucideIcon;
   label: string;
   children?: NavChild[];
 };

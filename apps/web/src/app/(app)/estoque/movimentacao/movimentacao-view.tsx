@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -66,7 +66,7 @@ export function MovimentacaoView({
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  const form = useForm<MovForm>({ resolver: zodResolver(schema), defaultValues: DEFAULT });
+  const form = useForm<MovForm>({ resolver: zodResolver(schema) as Resolver<MovForm>, defaultValues: DEFAULT });
   const movType = form.watch("movementType");
 
   const filtered = movements.filter((m) => {
