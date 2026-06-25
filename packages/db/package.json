@@ -13,6 +13,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:seed-compras": "npx ts-node --transpile-only seed-compras.ts",
+    "db:seed-vendas": "npx ts-node --transpile-only seed-vendas.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

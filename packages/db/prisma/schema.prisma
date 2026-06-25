@@ -64,6 +64,7 @@ model Cliente {
   updatedAt     DateTime @updatedAt
 
   accountsReceivable AccountsReceivable[]
+  salesOrders        SalesOrder[]
 
   @@index([tenantId])
   @@map("clientes")
@@ -114,6 +115,7 @@ model Produto {
   inventoryCountItems InventoryCountItem[]
   purchaseQuoteItems  PurchaseQuoteItem[]
   purchaseOrderItems  PurchaseOrderItem[]
+  salesOrderItems     SalesOrderItem[]
 
   @@unique([tenantId, codigo])
   @@index([tenantId])
@@ -350,6 +352,49 @@ model CashFlow {
   @@map("cash_flow")
 }
 
+// ─── Vendas ──────────────────────────────────────────────────────────────────
+
+model SalesOrder {
+  id            String           @id @default(cuid())
+  tenantId      String
+  clientId      String?
+  clientName    String
+  number        String
+  issueDate     DateTime
+  deliveryDate  DateTime?
+  status        SalesOrderStatus @default(DRAFT)
+  subtotal      Decimal          @db.Decimal(12, 2)
+  discountTotal Decimal          @default(0) @db.Decimal(12, 2)
+  total         Decimal          @db.Decimal(12, 2)
+  notes         String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  client Cliente?        @relation(fields: [clientId], references: [id])
+  items  SalesOrderItem[]
+
+  @@unique([tenantId, number])
+  @@index([tenantId])
+  @@map("sales_orders")
+}
+
+model SalesOrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
+  productName String
+  productUnit String  @default("UN")
+  quantity    Decimal @db.Decimal(12, 3)
+  unitPrice   Decimal @db.Decimal(12, 4)
+  discountPct Decimal @default(0) @db.Decimal(5, 2)
+  totalPrice  Decimal @db.Decimal(12, 2)
+
+  order   SalesOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Produto    @relation(fields: [productId], references: [id])
+
+  @@map("sales_order_items")
+}
+
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum Plan {
@@ -404,5 +449,12 @@ enum QuoteStatus {
 enum OrderStatus {
   PENDING
   RECEIVED
+  CANCELLED
+}
+
+enum SalesOrderStatus {
+  DRAFT
+  CONFIRMED
+  INVOICED
   CANCELLED
 }

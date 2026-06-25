@@ -32,7 +32,15 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/vendas", icon: ShoppingCart, label: "Vendas" },
+  {
+    href: "/vendas/pedidos",
+    icon: ShoppingCart,
+    label: "Vendas",
+    children: [
+      { href: "/vendas/pedidos", label: "Pedidos" },
+      { href: "/configuracoes/clientes", label: "Clientes" },
+    ],
+  },
   {
     href: "/compras/cotacoes",
     icon: Package,
