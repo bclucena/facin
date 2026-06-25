@@ -148,8 +148,9 @@ pnpm db:push      # sync schema sem migration (prototipagem)
 - [x] Rotas placeholder: /vendas, /compras, /estoque, /financeiro, /fiscal, /relatorios
 - [x] Módulo Cadastros: /configuracoes (hub) + /clientes, /fornecedores, /produtos, /depositos
 - [ ] Clerk configurado com chaves reais
-- [ ] Schema Prisma multi-tenant completo — próxima sessão
-- [ ] Módulo: Pedidos
+- [x] Schema Prisma multi-tenant completo — Cadastros + Estoque + Financeiro + Compras
+- [ ] Módulo: Pedidos de Venda
 - [x] Módulo: Estoque — /estoque, /estoque/movimentacao, /estoque/inventario (dados reais Railway)
 - [x] Módulo: Financeiro — /contas-a-pagar, /contas-a-receber, /fluxo-de-caixa (dados reais Railway)
+- [x] Módulo: Compras — /compras (hub), /compras/cotacoes (useFieldArray, converter em OC), /compras/ordens (receber NF integrado com estoque + AP)
 - [ ] Deploy no Vercel

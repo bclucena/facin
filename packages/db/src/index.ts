@@ -15,10 +15,11 @@ export const db =
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
 
-export { Prisma, AccountType, MovementType, PaymentType, BillStatus, CashFlowType } from "@prisma/client";
+export { Prisma, AccountType, MovementType, PaymentType, BillStatus, CashFlowType, QuoteStatus, OrderStatus } from "@prisma/client";
 export type {
   Tenant, User, Plan, UserRole,
   Cliente, Fornecedor, Produto, Deposito,
   StockBalance, StockMovement, InventoryCount, InventoryCountItem,
   AccountsPayable, AccountsReceivable, CashFlow,
+  PurchaseQuote, PurchaseQuoteItem, PurchaseOrder, PurchaseOrderItem,
 } from "@prisma/client";

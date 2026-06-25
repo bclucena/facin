@@ -87,6 +87,8 @@ model Fornecedor {
   updatedAt     DateTime @updatedAt
 
   accountsPayable AccountsPayable[]
+  purchaseQuotes  PurchaseQuote[]
+  purchaseOrders  PurchaseOrder[]
 
   @@index([tenantId])
   @@map("fornecedores")
@@ -107,9 +109,11 @@ model Produto {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  stockBalances      StockBalance[]
-  stockMovements     StockMovement[]
+  stockBalances       StockBalance[]
+  stockMovements      StockMovement[]
   inventoryCountItems InventoryCountItem[]
+  purchaseQuoteItems  PurchaseQuoteItem[]
+  purchaseOrderItems  PurchaseOrderItem[]
 
   @@unique([tenantId, codigo])
   @@index([tenantId])
@@ -204,6 +208,85 @@ model InventoryCountItem {
   product        Produto        @relation(fields: [productId], references: [id])
 
   @@map("inventory_count_items")
+}
+
+// ─── Compras ─────────────────────────────────────────────────────────────────
+
+model PurchaseQuote {
+  id           String      @id @default(cuid())
+  tenantId     String
+  supplierId   String
+  supplierName String
+  number       String
+  issueDate    DateTime
+  expectedDate DateTime?
+  paymentTerms String?
+  status       QuoteStatus @default(DRAFT)
+  totalAmount  Decimal     @db.Decimal(12, 2)
+  createdAt    DateTime    @default(now())
+
+  supplier Fornecedor         @relation(fields: [supplierId], references: [id])
+  items    PurchaseQuoteItem[]
+  orders   PurchaseOrder[]
+
+  @@unique([tenantId, number])
+  @@index([tenantId])
+  @@map("purchase_quotes")
+}
+
+model PurchaseQuoteItem {
+  id        String  @id @default(cuid())
+  quoteId   String
+  productId String
+  quantity  Decimal @db.Decimal(12, 3)
+  unitCost  Decimal @db.Decimal(12, 4)
+  totalCost Decimal @db.Decimal(12, 2)
+
+  quote   PurchaseQuote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product Produto       @relation(fields: [productId], references: [id])
+
+  @@map("purchase_quote_items")
+}
+
+model PurchaseOrder {
+  id           String      @id @default(cuid())
+  tenantId     String
+  supplierId   String
+  supplierName String
+  quoteId      String?
+  number       String
+  issueDate    DateTime
+  expectedDate DateTime?
+  paymentTerms String?
+  status       OrderStatus @default(PENDING)
+  totalAmount  Decimal     @db.Decimal(12, 2)
+  nfNumber     String?
+  nfDate       DateTime?
+  nfAmount     Decimal?    @db.Decimal(12, 2)
+  createdAt    DateTime    @default(now())
+
+  supplier Fornecedor        @relation(fields: [supplierId], references: [id])
+  quote    PurchaseQuote?    @relation(fields: [quoteId], references: [id])
+  items    PurchaseOrderItem[]
+
+  @@unique([tenantId, number])
+  @@index([tenantId])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
+  quantity    Decimal @db.Decimal(12, 3)
+  unitCost    Decimal @db.Decimal(12, 4)
+  totalCost   Decimal @db.Decimal(12, 2)
+  receivedQty Decimal @default(0) @db.Decimal(12, 3)
+
+  order   PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Produto       @relation(fields: [productId], references: [id])
+
+  @@map("purchase_order_items")
 }
 
 // ─── Financeiro ──────────────────────────────────────────────────────────────
@@ -310,4 +393,16 @@ enum BillStatus {
 enum CashFlowType {
   CREDIT
   DEBIT
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  CONVERTED
+}
+
+enum OrderStatus {
+  PENDING
+  RECEIVED
+  CANCELLED
 }

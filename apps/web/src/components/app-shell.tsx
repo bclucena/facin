@@ -33,7 +33,15 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/vendas", icon: ShoppingCart, label: "Vendas" },
-  { href: "/compras", icon: Package, label: "Compras" },
+  {
+    href: "/compras/cotacoes",
+    icon: Package,
+    label: "Compras",
+    children: [
+      { href: "/compras/cotacoes", label: "Cotações" },
+      { href: "/compras/ordens", label: "Ordens de Compra" },
+    ],
+  },
   { href: "/estoque", icon: Warehouse, label: "Estoque" },
   {
     href: "/financeiro/contas-a-pagar",
