@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "skills": {
+    "clerk-nextjs-patterns": {
+      "source": "clerk/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frameworks/clerk-nextjs-patterns/SKILL.md",
+      "computedHash": "6c5b897dcef62550436b24b3cc9087658dd97c9ca88272ab48a5c094276d72fb"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
+    },
+    "improve-codebase-architecture": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
+      "computedHash": "8bf292143ca93b00276a0de0fc5f84f2381f4690c5b0d32e99fa283a072f392f"
+    },
+    "nextjs-app-router-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend-mobile-development/skills/nextjs-app-router-patterns/SKILL.md",
+      "computedHash": "b4fea42eecf1f803155ef7fa133d5286ee8f2dbba3e616954e9e43c6f0ffc144"
+    },
+    "nextjs-best-practices": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-best-practices/SKILL.md",
+      "computedHash": "5344522f15f544513456e77b858377368f24e680732af5efeb5a67bbab021bc1"
+    },
+    "nextjs-react-typescript": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "nextjs-react-typescript/SKILL.md",
+      "computedHash": "eb995cc826bf48498e0e90969fc7dadfa2ec634002c26cfcfde565134cefa738"
+    },
+    "prisma-client-api": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-client-api/SKILL.md",
+      "computedHash": "0434410e48fb796bbdc3ad0050654bfc9cf72c89b30dbad098ee5c9f655b7f85"
+    },
+    "prisma-database-setup": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-database-setup/SKILL.md",
+      "computedHash": "46d2dc2f9c968722376bbb6a1a1389c82bd7cceb5973ac1486c54890514b8959"
+    },
+    "prisma-next": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next/SKILL.md",
+      "computedHash": "4d31f884f4fb0670789502e6119b8b401b76871b06cad66ea00dbefcf5500bb5"
+    },
+    "prisma-next-build": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-build/SKILL.md",
+      "computedHash": "3a912b373a91de66e1b797a2b4f76278d6f8a33ef95e76a86c926950e4312430"
+    },
+    "prisma-next-contract": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-contract/SKILL.md",
+      "computedHash": "aad98f4ddca62915134b044fcb0b93d9e2f38a5097e2270251439811534cdb75"
+    },
+    "prisma-next-debug": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-debug/SKILL.md",
+      "computedHash": "31f2adc95b9b4a0bf64c1c5a42fc5916d110f375978df663603ebed6be86314a"
+    },
+    "prisma-next-extension-upgrade": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/extension-author/prisma-next-extension-upgrade/SKILL.md",
+      "computedHash": "914c69647e421c7f461075e6f121d3228b159b44845cac509f6598ffbfa1dc5b"
+    },
+    "prisma-next-feedback": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-feedback/SKILL.md",
+      "computedHash": "959738888ba233c1e69cb5f0606cdae6058569dc7cfdccb70b08dbe039b0bcdd"
+    },
+    "prisma-next-migration-review": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-migration-review/SKILL.md",
+      "computedHash": "065de1f196f848caf267083eecf0223bbba2499c47d4fdf059a101659812004c"
+    },
+    "prisma-next-migrations": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-migrations/SKILL.md",
+      "computedHash": "a68d90aff6d1d5fc329451a0b7da0c8758df7c765395e94e1633451d3290c638"
+    },
+    "prisma-next-queries": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-queries/SKILL.md",
+      "computedHash": "15221d366855d42463fc2e0c449c77bf192574e14d72fd2add54dd91051d8025"
+    },
+    "prisma-next-quickstart": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-quickstart/SKILL.md",
+      "computedHash": "051662cd5c4b9ecb21237dedd1a94164d7e46c46e64ffd6b70780c8e309cb7b6"
+    },
+    "prisma-next-runtime": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-runtime/SKILL.md",
+      "computedHash": "287b3698863767e34a5e56b685eea70590fbfbe0431a20c924f369096517dd09"
+    },
+    "prisma-next-upgrade": {
+      "source": "prisma/prisma-next",
+      "sourceType": "github",
+      "skillPath": "skills/upgrade/prisma-next-upgrade/SKILL.md",
+      "computedHash": "4ff12ab4bbcbcc58b4d68e84c258897601187effa2cc31258b4a1c42b2ead299"
+    },
+    "tailwind-css-patterns": {
+      "source": "giuseppe-trisciuoglio/developer-kit",
+      "sourceType": "github",
+      "skillPath": "plugins/developer-kit-typescript/skills/tailwind-css-patterns/SKILL.md",
+      "computedHash": "6092620c3af955a46ea2b94ca8a40197ac8392e6bbdc8c7515659328b186c770"
+    },
+    "tailwind-design-system": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend-mobile-development/skills/tailwind-design-system/SKILL.md",
+      "computedHash": "cd61afd28f594e8b6712b61749209cbb4466e3eec4e4223793bbd97fc85c1b63"
+    }
+  }
+}

@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Multi-tenancy ───────────────────────────────────────────────────────────
+// Toda entidade de negócio tem tenantId (Row-Level Isolation).
+// tenantId corresponde ao organizationId do Clerk.
+
+model Tenant {
+  id        String   @id @default(cuid())
+  clerkOrgId String  @unique
+  name      String
+  cnpj      String   @unique
+  slug      String   @unique
+  plan      Plan     @default(FREE)
+  active    Boolean  @default(true)
+  primaryColor String @default("#0F5132")
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+
+  @@map("tenants")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  clerkUserId String  @unique
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  role       UserRole @default(OPERATOR)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+// ─── Cadastros ───────────────────────────────────────────────────────────────
+
+model Cliente {
+  id            String   @id @default(cuid())
+  tenantId      String
+  nome          String
+  documento     String
+  telefone      String?
+  whatsapp      String?
+  email         String?
+  cep           String?
+  endereco      String?
+  bairro        String?
+  cidade        String?
+  uf            String?  @db.Char(2)
+  limiteCredito Decimal  @default(0) @db.Decimal(12, 2)
+  tabelaPreco   String?
+  ativo         Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("clientes")
+}
+
+model Fornecedor {
+  id            String   @id @default(cuid())
+  tenantId      String
+  nome          String
+  cnpj          String
+  ie            String?
+  tipoAtividade String?
+  telefone      String?
+  whatsapp      String?
+  email         String?
+  cep           String?
+  endereco      String?
+  prazoEntrega  Int      @default(0)
+  ativo         Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("fornecedores")
+}
+
+model Produto {
+  id            String   @id @default(cuid())
+  tenantId      String
+  codigo        String
+  codigoBarras  String?
+  descricao     String
+  unidade       String   @default("UN")
+  tipo          String?
+  grupo         String?
+  fabricante    String?
+  estoqueMinimo Decimal  @default(0) @db.Decimal(12, 3)
+  ativo         Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  stockBalances      StockBalance[]
+  stockMovements     StockMovement[]
+  inventoryCountItems InventoryCountItem[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId])
+  @@map("produtos")
+}
+
+model Deposito {
+  id        String   @id @default(cuid())
+  tenantId  String
+  nome      String
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stockBalances  StockBalance[]
+  stockMovements StockMovement[]
+  inventoryCounts InventoryCount[]
+
+  @@index([tenantId])
+  @@map("depositos")
+}
+
+// ─── Estoque ─────────────────────────────────────────────────────────────────
+
+model StockBalance {
+  id           String      @id @default(cuid())
+  tenantId     String
+  productId    String
+  warehouseId  String
+  accountType  AccountType @default(ESTOQUE)
+  quantity     Decimal     @default(0) @db.Decimal(12, 3)
+  qtyCommitted Decimal     @default(0) @db.Decimal(12, 3)
+  expiryDate   DateTime?
+  updatedAt    DateTime    @updatedAt
+
+  product   Produto  @relation(fields: [productId], references: [id])
+  warehouse Deposito @relation(fields: [warehouseId], references: [id])
+
+  @@unique([tenantId, productId, warehouseId, accountType])
+  @@index([tenantId])
+  @@map("stock_balances")
+}
+
+model StockMovement {
+  id               String       @id @default(cuid())
+  tenantId         String
+  productId        String
+  warehouseId      String
+  accountType      AccountType  @default(ESTOQUE)
+  movementType     MovementType
+  quantity         Decimal      @db.Decimal(12, 3)
+  lot              String?
+  manufacturingDate DateTime?
+  expiryDate       DateTime?
+  notes            String?
+  userId           String?
+  createdAt        DateTime     @default(now())
+
+  product   Produto  @relation(fields: [productId], references: [id])
+  warehouse Deposito @relation(fields: [warehouseId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+  @@map("stock_movements")
+}
+
+model InventoryCount {
+  id          String      @id @default(cuid())
+  tenantId    String
+  warehouseId String
+  accountType AccountType @default(ESTOQUE)
+  status      String      @default("OPEN")
+  userId      String?
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+
+  warehouse Deposito             @relation(fields: [warehouseId], references: [id])
+  items     InventoryCountItem[]
+
+  @@index([tenantId])
+  @@map("inventory_counts")
+}
+
+model InventoryCountItem {
+  id               String  @id @default(cuid())
+  inventoryCountId String
+  productId        String
+  systemQty        Decimal @db.Decimal(12, 3)
+  countedQty       Decimal @default(0) @db.Decimal(12, 3)
+
+  inventoryCount InventoryCount @relation(fields: [inventoryCountId], references: [id], onDelete: Cascade)
+  product        Produto        @relation(fields: [productId], references: [id])
+
+  @@map("inventory_count_items")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Plan {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  OPERATOR
+}
+
+enum AccountType {
+  ESTOQUE_NF
+  ESTOQUE
+  ESTOQUE_FISICO
+}
+
+enum MovementType {
+  ENTRADA
+  SAIDA
+}

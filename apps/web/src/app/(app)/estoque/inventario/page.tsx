@@ -1,0 +1,22 @@
+import { db } from "@facin/db";
+import { getTenantId } from "@/lib/tenant";
+import { InventarioView } from "./inventario-view";
+
+export default async function InventarioPage() {
+  const tenantId = getTenantId();
+
+  const [depositos, produtos, rawBalances] = await Promise.all([
+    db.deposito.findMany({ where: { tenantId, ativo: true }, orderBy: { nome: "asc" }, select: { id: true, nome: true } }),
+    db.produto.findMany({ where: { tenantId, ativo: true }, orderBy: { descricao: "asc" }, select: { id: true, codigo: true, descricao: true, unidade: true } }),
+    db.stockBalance.findMany({ where: { tenantId }, select: { productId: true, warehouseId: true, accountType: true, quantity: true } }),
+  ]);
+
+  const balances = rawBalances.map((b) => ({
+    productId: b.productId,
+    warehouseId: b.warehouseId,
+    accountType: b.accountType,
+    quantity: Number(b.quantity),
+  }));
+
+  return <InventarioView depositos={depositos} produtos={produtos} balances={balances} />;
+}
