@@ -7,6 +7,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   transpilePackages: ["@facin/ui", "@facin/db"],
+  experimental: {
+    serverComponentsExternalPackages: ['@clerk/nextjs'],
+  },
 };
 
 export default nextConfig;
