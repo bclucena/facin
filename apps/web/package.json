@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.2.0",
     "@facin/db": "workspace:*",
     "@facin/ui": "workspace:*",
     "@hookform/resolvers": "^5.4.0",
