@@ -12,7 +12,9 @@
       ]
     },
     "noEmit": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "strict": true,
+    "noImplicitAny": true
   },
   "include": [
     "next-env.d.ts",
