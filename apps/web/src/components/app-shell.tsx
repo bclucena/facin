@@ -22,12 +22,29 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const navItems = [
+type NavChild = { href: string; label: string };
+type NavItem = {
+  href: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  children?: NavChild[];
+};
+
+const navItems: NavItem[] = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/vendas", icon: ShoppingCart, label: "Vendas" },
   { href: "/compras", icon: Package, label: "Compras" },
   { href: "/estoque", icon: Warehouse, label: "Estoque" },
-  { href: "/financeiro", icon: Banknote, label: "Financeiro" },
+  {
+    href: "/financeiro/contas-a-pagar",
+    icon: Banknote,
+    label: "Financeiro",
+    children: [
+      { href: "/financeiro/contas-a-pagar", label: "Contas a Pagar" },
+      { href: "/financeiro/contas-a-receber", label: "Contas a Receber" },
+      { href: "/financeiro/fluxo-de-caixa", label: "Fluxo de Caixa" },
+    ],
+  },
   { href: "/fiscal", icon: FileText, label: "Fiscal" },
   { href: "/relatorios", icon: BarChart3, label: "Relatórios" },
   { href: "/configuracoes", icon: Settings, label: "Configurações" },
@@ -73,25 +90,57 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Nav items */}
         <nav className="flex-1 py-3 overflow-y-auto">
-          {navItems.map(({ href, icon: Icon, label }) => {
-            const isActive = pathname === href || pathname.startsWith(href + "/");
+          {navItems.map((item) => {
+            const { href, icon: Icon, label, children } = item;
+            // For parent items with children, derive the base section path
+            const basePath = children ? "/" + href.split("/")[1] : href;
+            const isActive = children
+              ? pathname.startsWith(basePath)
+              : pathname === href || pathname.startsWith(href + "/");
+
             return (
-              <Link
-                key={href}
-                href={href}
-                title={collapsed ? label : undefined}
-                onClick={() => setMobileOpen(false)}
-                className={[
-                  "flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg",
-                  "text-sm transition-colors duration-150",
-                  isActive
-                    ? "bg-[#0F5132] text-white"
-                    : "text-white/60 hover:text-white hover:bg-white/10",
-                ].join(" ")}
-              >
-                <Icon size={18} className="flex-shrink-0" />
-                {!collapsed && <span className="truncate">{label}</span>}
-              </Link>
+              <div key={href}>
+                <Link
+                  href={href}
+                  title={collapsed ? label : undefined}
+                  onClick={() => setMobileOpen(false)}
+                  className={[
+                    "flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg",
+                    "text-sm transition-colors duration-150",
+                    isActive
+                      ? "bg-[#0F5132] text-white"
+                      : "text-white/60 hover:text-white hover:bg-white/10",
+                  ].join(" ")}
+                >
+                  <Icon size={18} className="flex-shrink-0" />
+                  {!collapsed && <span className="truncate">{label}</span>}
+                </Link>
+
+                {/* Sub-menu — shown when expanded and parent is active */}
+                {children && !collapsed && isActive && (
+                  <div className="mt-0.5 mb-1">
+                    {children.map((child) => {
+                      const childActive = pathname === child.href || pathname.startsWith(child.href + "/");
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={[
+                            "flex items-center ml-9 mr-2 px-3 py-1.5 rounded-lg",
+                            "text-xs transition-colors duration-150",
+                            childActive
+                              ? "text-white bg-white/15 font-medium"
+                              : "text-white/50 hover:text-white/80 hover:bg-white/10",
+                          ].join(" ")}
+                        >
+                          {child.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>

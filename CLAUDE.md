@@ -151,5 +151,5 @@ pnpm db:push      # sync schema sem migration (prototipagem)
 - [ ] Schema Prisma multi-tenant completo — próxima sessão
 - [ ] Módulo: Pedidos
 - [x] Módulo: Estoque — /estoque, /estoque/movimentacao, /estoque/inventario (dados reais Railway)
-- [ ] Módulo: Financeiro
+- [x] Módulo: Financeiro — /contas-a-pagar, /contas-a-receber, /fluxo-de-caixa (dados reais Railway)
 - [ ] Deploy no Vercel
