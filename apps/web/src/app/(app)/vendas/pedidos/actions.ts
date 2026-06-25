@@ -50,7 +50,7 @@ export async function criarPedido(payload: SalesOrderPayload) {
       total: payload.total,
       notes: payload.notes || null,
       items: {
-        create: payload.items.map((i) => ({
+        create: payload.items.map((i: SalesItemPayload) => ({
           productId: i.productId,
           productName: i.productName,
           productUnit: i.productUnit,

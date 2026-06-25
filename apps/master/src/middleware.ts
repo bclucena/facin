@@ -1,19 +1,19 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextRequest, type NextFetchEvent } from "next/server";
 
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
-// Passthrough enquanto CLERK_SECRET_KEY não está configurado.
-export default function middleware(request: NextRequest) {
+const clerk = clerkMiddleware((auth, req) => {
+  if (!isPublicRoute(req)) {
+    auth().protect();
+  }
+});
+
+export default function middleware(request: NextRequest, event: NextFetchEvent) {
   if (!process.env.CLERK_SECRET_KEY) {
     return NextResponse.next();
   }
-
-  return clerkMiddleware((auth, req) => {
-    if (!isPublicRoute(req)) {
-      auth().protect();
-    }
-  })(request);
+  return clerk(request, event);
 }
 
 export const config = {

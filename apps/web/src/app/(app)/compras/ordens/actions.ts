@@ -49,7 +49,7 @@ export async function criarOrdem(payload: OrderPayload) {
       paymentTerms: payload.paymentTerms || null,
       totalAmount: payload.totalAmount,
       items: {
-        create: payload.items.map((i) => ({
+        create: payload.items.map((i: OrderItemPayload) => ({
           productId: i.productId,
           quantity: i.quantity,
           unitCost: i.unitCost,

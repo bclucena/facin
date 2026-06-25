@@ -37,7 +37,7 @@ export async function criarCotacao(payload: QuotePayload) {
       paymentTerms: payload.paymentTerms || null,
       totalAmount: payload.totalAmount,
       items: {
-        create: payload.items.map((i) => ({
+        create: payload.items.map((i: QuoteItemPayload) => ({
           productId: i.productId,
           quantity: i.quantity,
           unitCost: i.unitCost,
