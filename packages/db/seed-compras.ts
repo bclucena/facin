@@ -1,14 +1,11 @@
 import { PrismaClient, QuoteStatus, OrderStatus, AccountType, MovementType } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const tenantId = "dom-padeiro-dev";
 
 async function main() {
-  const tenant = await prisma.tenant.findFirst();
-  if (!tenant) throw new Error("Nenhum tenant encontrado. Rode o seed principal primeiro.");
-  const tenantId = tenant.id;
-
   const produtos = await prisma.produto.findMany({ where: { tenantId }, orderBy: { codigo: "asc" } });
-  if (produtos.length < 2) throw new Error("Produtos insuficientes. Rode seed-cadastros primeiro.");
+  if (produtos.length < 2) throw new Error("Produtos insuficientes. Rode seed-dom-padeiro ou seed-estoque primeiro.");
 
   const fornecedores = await prisma.fornecedor.findMany({ where: { tenantId }, orderBy: { nome: "asc" } });
   if (fornecedores.length < 2) throw new Error("Fornecedores insuficientes. Rode seed-financeiro primeiro.");
@@ -20,107 +17,94 @@ async function main() {
   const [p1, p2, p3] = produtos;
   const deposito = depositos[0];
 
-  // Remove cotações e OC anteriores do seed
+  // Custos de referência (o schema não armazena precoCompra no Produto)
+  const custo1 = 48.5;
+  const custo2 = 32.0;
+  const custo3 = 15.75;
+
+  // Limpa registros anteriores do seed
   await prisma.purchaseOrder.deleteMany({ where: { tenantId, number: { in: ["OC-2026-001", "OC-2026-002"] } } });
   await prisma.purchaseQuote.deleteMany({ where: { tenantId, number: { in: ["COT-2026-001", "COT-2026-002"] } } });
 
-  console.log("Criando cotações...");
+  console.log(`Usando fornecedores: ${f1.nome} | ${f2.nome}`);
+  console.log(`Usando produtos: ${p1.descricao} | ${p2.descricao} | ${p3.descricao}`);
+  console.log(`Depósito destino: ${deposito.nome}`);
+  console.log("\nCriando cotações...");
 
   // COT-001 — DRAFT
   const cot1 = await prisma.purchaseQuote.create({
     data: {
       tenantId,
       number: "COT-2026-001",
-      supplierId: f1.id,
+      supplier: { connect: { id: f1.id } },
       supplierName: f1.nome,
       issueDate: new Date("2026-06-20"),
       expectedDate: new Date("2026-07-05"),
       paymentTerms: "30 dias",
       status: QuoteStatus.DRAFT,
-      totalAmount: Number(p1.precoCompra) * 50 + Number(p2.precoCompra) * 30,
+      totalAmount: custo1 * 50 + custo2 * 30,
       items: {
         create: [
-          {
-            productId: p1.id,
-            quantity: 50,
-            unitCost: Number(p1.precoCompra),
-            totalCost: Number(p1.precoCompra) * 50,
-          },
-          {
-            productId: p2.id,
-            quantity: 30,
-            unitCost: Number(p2.precoCompra),
-            totalCost: Number(p2.precoCompra) * 30,
-          },
+          { product: { connect: { id: p1.id } }, quantity: 50, unitCost: custo1, totalCost: custo1 * 50 },
+          { product: { connect: { id: p2.id } }, quantity: 30, unitCost: custo2, totalCost: custo2 * 30 },
         ],
       },
     },
   });
-  console.log(`  COT DRAFT: ${cot1.number}`);
+  console.log(`  ✓ ${cot1.number} — DRAFT (${f1.nome})`);
 
-  // COT-002 — CONVERTED (gerará a OC-001)
+  // COT-002 — CONVERTED (dará origem à OC-001)
   const cot2 = await prisma.purchaseQuote.create({
     data: {
       tenantId,
       number: "COT-2026-002",
-      supplierId: f2.id,
+      supplier: { connect: { id: f2.id } },
       supplierName: f2.nome,
       issueDate: new Date("2026-06-15"),
       expectedDate: new Date("2026-06-30"),
       paymentTerms: "À vista",
       status: QuoteStatus.CONVERTED,
-      totalAmount: Number(p3.precoCompra) * 100,
+      totalAmount: custo3 * 100,
       items: {
         create: [
-          {
-            productId: p3.id,
-            quantity: 100,
-            unitCost: Number(p3.precoCompra),
-            totalCost: Number(p3.precoCompra) * 100,
-          },
+          { product: { connect: { id: p3.id } }, quantity: 100, unitCost: custo3, totalCost: custo3 * 100 },
         ],
       },
     },
   });
-  console.log(`  COT CONVERTED: ${cot2.number}`);
+  console.log(`  ✓ ${cot2.number} — CONVERTED (${f2.nome})`);
 
-  console.log("Criando ordens de compra...");
+  console.log("\nCriando ordens de compra...");
 
-  // OC-001 — PENDING (oriunda de COT-002)
+  // OC-001 — PENDING (oriunda da COT-002)
   const oc1 = await prisma.purchaseOrder.create({
     data: {
       tenantId,
       number: "OC-2026-001",
-      supplierId: f2.id,
+      supplier: { connect: { id: f2.id } },
       supplierName: f2.nome,
-      quoteId: cot2.id,
+      quote: { connect: { id: cot2.id } },
       issueDate: new Date("2026-06-16"),
       expectedDate: new Date("2026-06-30"),
       paymentTerms: "À vista",
       status: OrderStatus.PENDING,
-      totalAmount: Number(p3.precoCompra) * 100,
+      totalAmount: custo3 * 100,
       items: {
         create: [
-          {
-            productId: p3.id,
-            quantity: 100,
-            unitCost: Number(p3.precoCompra),
-            totalCost: Number(p3.precoCompra) * 100,
-            receivedQty: 0,
-          },
+          { product: { connect: { id: p3.id } }, quantity: 100, unitCost: custo3, totalCost: custo3 * 100, receivedQty: 0 },
         ],
       },
     },
   });
-  console.log(`  OC PENDING: ${oc1.number}`);
+  console.log(`  ✓ ${oc1.number} — PENDING (${f2.nome})`);
 
-  // OC-002 — RECEIVED com estoque e título a pagar lançados
-  const oc2Amount = Number(p1.precoCompra) * 20 + Number(p2.precoCompra) * 15;
+  // OC-002 — RECEIVED com movimentações de estoque e título a pagar
+  const oc2Amount = custo1 * 20 + custo2 * 15;
   const oc2 = await prisma.purchaseOrder.create({
     data: {
       tenantId,
       number: "OC-2026-002",
-      supplierId: f1.id,
+      supplier: { connect: { id: f1.id } },
       supplierName: f1.nome,
       issueDate: new Date("2026-06-10"),
       expectedDate: new Date("2026-06-20"),
@@ -132,38 +116,27 @@ async function main() {
       totalAmount: oc2Amount,
       items: {
         create: [
-          {
-            productId: p1.id,
-            quantity: 20,
-            unitCost: Number(p1.precoCompra),
-            totalCost: Number(p1.precoCompra) * 20,
-            receivedQty: 20,
-          },
-          {
-            productId: p2.id,
-            quantity: 15,
-            unitCost: Number(p2.precoCompra),
-            totalCost: Number(p2.precoCompra) * 15,
-            receivedQty: 15,
-          },
+          { product: { connect: { id: p1.id } }, quantity: 20, unitCost: custo1, totalCost: custo1 * 20, receivedQty: 20 },
+          { product: { connect: { id: p2.id } }, quantity: 15, unitCost: custo2, totalCost: custo2 * 15, receivedQty: 15 },
         ],
       },
     },
     include: { items: true },
   });
-  console.log(`  OC RECEIVED: ${oc2.number}`);
+  console.log(`  ✓ ${oc2.number} — RECEIVED NF ${oc2.nfNumber} (${f1.nome})`);
 
-  // Estoque e título para OC-002
+  // Movimentações de estoque para OC-002
+  console.log("\nLançando estoque e título a pagar para OC-002...");
   for (const item of oc2.items) {
     await prisma.stockMovement.create({
       data: {
         tenantId,
-        productId: item.productId,
-        warehouseId: deposito.id,
+        product: { connect: { id: item.productId } },
+        warehouse: { connect: { id: deposito.id } },
         accountType: AccountType.ESTOQUE_NF,
         movementType: MovementType.ENTRADA,
         quantity: Number(item.receivedQty),
-        notes: `Recebimento NF ${oc2.nfNumber} — ${oc2.number}`,
+        notes: `Recebimento ${oc2.nfNumber} — ${oc2.number}`,
       },
     });
 
@@ -178,8 +151,8 @@ async function main() {
       },
       create: {
         tenantId,
-        productId: item.productId,
-        warehouseId: deposito.id,
+        product: { connect: { id: item.productId } },
+        warehouse: { connect: { id: deposito.id } },
         accountType: AccountType.ESTOQUE_NF,
         quantity: Number(item.receivedQty),
       },
@@ -190,7 +163,7 @@ async function main() {
   await prisma.accountsPayable.create({
     data: {
       tenantId,
-      supplierId: f1.id,
+      supplier: { connect: { id: f1.id } },
       supplierName: f1.nome,
       description: `NF ${oc2.nfNumber} — ${oc2.number}`,
       amount: oc2Amount,
@@ -198,8 +171,8 @@ async function main() {
     },
   });
 
-  console.log("  Estoque NF e título a pagar lançados para OC-002.");
-  console.log("\nSeed Compras concluído.");
+  console.log("  ✓ Movimentações e título a pagar registrados.");
+  console.log("\nSeed Compras concluído com sucesso!");
 }
 
 main()
