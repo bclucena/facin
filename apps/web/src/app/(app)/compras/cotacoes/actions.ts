@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { db, QuoteStatus, OrderStatus } from "@facin/db";
+import { db, QuoteStatus, OrderStatus, type PurchaseQuoteItem } from "@facin/db";
 import { getTenantId } from "@/lib/tenant";
 
 export interface QuoteItemPayload {
@@ -87,7 +87,7 @@ export async function converterParaOC(quoteId: string) {
         paymentTerms: quote.paymentTerms,
         totalAmount: quote.totalAmount,
         items: {
-          create: quote.items.map((i) => ({
+          create: quote.items.map((i: PurchaseQuoteItem) => ({
             productId: i.productId,
             quantity: i.quantity,
             unitCost: i.unitCost,
