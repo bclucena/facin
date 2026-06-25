@@ -1,6 +1,5 @@
 import { db, BillStatus, CashFlowType } from "@facin/db";
 import { getTenantId } from "@/lib/tenant";
-import { currentUser } from "@clerk/nextjs/server";
 
 function fmt(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -16,8 +15,7 @@ function addDays(d: Date, n: number) {
 
 export default async function DashboardPage() {
   const tenantId = getTenantId();
-  const user = await currentUser().catch(() => null);
-  const firstName = user?.firstName ?? "usuário";
+  const firstName = "usuário";
 
   const now = new Date();
   const todayStart = startOfDay(now);

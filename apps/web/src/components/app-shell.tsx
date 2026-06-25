@@ -3,9 +3,6 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
-
-const clerkEnabled = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith("pk_");
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -211,7 +208,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Bell size={20} />
             </button>
-            {clerkEnabled && <UserButton afterSignOutUrl="/entrar" />}
           </div>
         </header>
 
