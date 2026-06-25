@@ -32,3 +32,10 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
+**/*.tsbuildinfo
+
+# Claude Code internal
+.claude/
