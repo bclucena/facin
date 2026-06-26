@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -209,7 +208,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Bell size={20} />
             </button>
-            <UserButton />
           </div>
         </header>
 

@@ -8,7 +8,7 @@ const nextConfig = {
   },
   transpilePackages: ["@facin/ui", "@facin/db"],
   experimental: {
-    serverComponentsExternalPackages: ['@clerk/nextjs'],
+    outputFileTracingRoot: '../../',
   },
 };
 
