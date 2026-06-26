@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { db } from "@facin/db";
 import { getTenantId } from "@/lib/tenant";
 import { EstoqueView } from "./estoque-view";

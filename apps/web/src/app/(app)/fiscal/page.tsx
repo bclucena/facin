@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { FileText } from "lucide-react";
 
 export default function FiscalPage() {

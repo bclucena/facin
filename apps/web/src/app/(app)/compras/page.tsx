@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Link from "next/link";
 import { FileSearch, ShoppingBag, Truck, ChevronRight } from "lucide-react";
 

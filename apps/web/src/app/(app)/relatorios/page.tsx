@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { BarChart3 } from "lucide-react";
 
 export default function RelatoriosPage() {

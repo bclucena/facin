@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { ShoppingCart } from "lucide-react";
 
 export default function VendasPage() {
