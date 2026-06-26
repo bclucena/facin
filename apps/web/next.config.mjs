@@ -6,7 +6,10 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  transpilePackages: ['@facin/ui', '@facin/db'],
+  transpilePackages: ['@facin/ui'],
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client', '@prisma/engines'],
+  },
 }
 
 export default nextConfig
