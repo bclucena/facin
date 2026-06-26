@@ -6,13 +6,20 @@ import { ProdutosView } from "./produtos-view";
 
 export default async function ProdutosPage() {
   const tenantId = getTenantId();
-  const raw = await db.produto.findMany({
-    where: { tenantId },
-    orderBy: { descricao: "asc" },
-  });
-  const produtos = raw.map((p) => ({
-    ...p,
-    estoqueMinimo: Number(p.estoqueMinimo),
-  }));
+
+  let produtos: any[] = [];
+  try {
+    const raw = await db.produto.findMany({
+      where: { tenantId },
+      orderBy: { descricao: "asc" },
+    });
+    produtos = raw.map((p) => ({
+      ...p,
+      estoqueMinimo: Number(p.estoqueMinimo),
+    }));
+  } catch (e) {
+    console.error('DB Error:', e);
+  }
+
   return <ProdutosView produtos={produtos} />;
 }

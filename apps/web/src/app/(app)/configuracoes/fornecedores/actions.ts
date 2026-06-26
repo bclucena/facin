@@ -22,16 +22,31 @@ export interface FornecedorPayload {
 
 export async function criarFornecedor(payload: FornecedorPayload) {
   const tenantId = getTenantId();
-  await db.fornecedor.create({ data: { ...payload, tenantId } });
-  revalidatePath(PATH);
+  try {
+    await db.fornecedor.create({ data: { ...payload, tenantId } });
+    revalidatePath(PATH);
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao salvar fornecedor. Tente novamente.');
+  }
 }
 
 export async function atualizarFornecedor(id: string, payload: FornecedorPayload) {
-  await db.fornecedor.update({ where: { id }, data: payload });
-  revalidatePath(PATH);
+  try {
+    await db.fornecedor.update({ where: { id }, data: payload });
+    revalidatePath(PATH);
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao atualizar fornecedor. Tente novamente.');
+  }
 }
 
 export async function toggleAtivoFornecedor(id: string, ativo: boolean) {
-  await db.fornecedor.update({ where: { id }, data: { ativo } });
-  revalidatePath(PATH);
+  try {
+    await db.fornecedor.update({ where: { id }, data: { ativo } });
+    revalidatePath(PATH);
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao atualizar fornecedor. Tente novamente.');
+  }
 }

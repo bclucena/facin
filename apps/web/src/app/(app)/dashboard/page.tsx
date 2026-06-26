@@ -24,61 +24,60 @@ export default async function DashboardPage() {
   const todayEnd = addDays(todayStart, 1);
   const in7Days = addDays(todayStart, 7);
 
-  const [cashToday, receivable, payable7d, criticalStock] = await Promise.all([
-    // Caixa hoje: créditos - débitos do referenceDate = hoje
-    db.cashFlow.findMany({
-      where: {
-        tenantId,
-        referenceDate: { gte: todayStart, lt: todayEnd },
-      },
-      select: { type: true, amount: true },
-    }),
+  let caixaHoje = 0;
+  let receivableAmount = 0;
+  let receivableCount = 0;
+  let payable7dAmount = 0;
+  let payable7dCount = 0;
+  let estoquesCriticos = 0;
 
-    // A receber: títulos PENDING
-    db.accountsReceivable.aggregate({
-      where: { tenantId, status: BillStatus.PENDING },
-      _sum: { amount: true },
-      _count: { id: true },
-    }),
+  try {
+    const [cashToday, receivable, payable7d, criticalStock] = await Promise.all([
+      db.cashFlow.findMany({
+        where: { tenantId, referenceDate: { gte: todayStart, lt: todayEnd } },
+        select: { type: true, amount: true },
+      }),
+      db.accountsReceivable.aggregate({
+        where: { tenantId, status: BillStatus.PENDING },
+        _sum: { amount: true },
+        _count: { id: true },
+      }),
+      db.accountsPayable.aggregate({
+        where: { tenantId, status: BillStatus.PENDING, dueDate: { lte: in7Days } },
+        _sum: { amount: true },
+        _count: { id: true },
+      }),
+      db.stockBalance.groupBy({
+        by: ["productId"],
+        where: { tenantId },
+        _sum: { quantity: true },
+      }),
+    ]);
 
-    // A pagar 7d: títulos PENDING vencendo até hoje+7
-    db.accountsPayable.aggregate({
-      where: {
-        tenantId,
-        status: BillStatus.PENDING,
-        dueDate: { lte: in7Days },
-      },
-      _sum: { amount: true },
-      _count: { id: true },
-    }),
+    caixaHoje = cashToday.reduce((s, e) => {
+      return s + (e.type === CashFlowType.CREDIT ? Number(e.amount) : -Number(e.amount));
+    }, 0);
 
-    // Estoque crítico: produtos onde soma dos saldos <= estoqueMinimo
-    // Usamos groupBy para agregar saldos por produto
-    db.stockBalance.groupBy({
-      by: ["productId"],
-      where: { tenantId },
-      _sum: { quantity: true },
-    }),
-  ]);
+    receivableAmount = Number(receivable._sum.amount ?? 0);
+    receivableCount = receivable._count.id;
+    payable7dAmount = Number(payable7d._sum.amount ?? 0);
+    payable7dCount = payable7d._count.id;
 
-  // Calcula saldo do dia (créditos - débitos)
-  const caixaHoje = cashToday.reduce((s, e) => {
-    return s + (e.type === CashFlowType.CREDIT ? Number(e.amount) : -Number(e.amount));
-  }, 0);
+    const productIds = criticalStock.map((r) => r.productId);
+    const produtosMinimo = productIds.length > 0
+      ? await db.produto.findMany({
+          where: { id: { in: productIds }, tenantId },
+          select: { id: true, estoqueMinimo: true },
+        })
+      : [];
 
-  // Pega estoqueMinimo de cada produto que aparece no groupBy
-  const productIds = criticalStock.map((r) => r.productId);
-  const produtosMinimo = productIds.length > 0
-    ? await db.produto.findMany({
-        where: { id: { in: productIds }, tenantId },
-        select: { id: true, estoqueMinimo: true },
-      })
-    : [];
-
-  const minimoMap = Object.fromEntries(produtosMinimo.map((p) => [p.id, Number(p.estoqueMinimo)]));
-  const estoquesCriticos = criticalStock.filter(
-    (r) => Number(r._sum.quantity ?? 0) <= (minimoMap[r.productId] ?? 0)
-  ).length;
+    const minimoMap = Object.fromEntries(produtosMinimo.map((p) => [p.id, Number(p.estoqueMinimo)]));
+    estoquesCriticos = criticalStock.filter(
+      (r) => Number(r._sum.quantity ?? 0) <= (minimoMap[r.productId] ?? 0)
+    ).length;
+  } catch (e) {
+    console.error('DB Error:', e);
+  }
 
   const kpiCards = [
     {
@@ -89,14 +88,14 @@ export default async function DashboardPage() {
     },
     {
       label: "A receber",
-      value: fmt(Number(receivable._sum.amount ?? 0)),
-      badge: `${receivable._count.id} título${receivable._count.id !== 1 ? "s" : ""}`,
+      value: fmt(receivableAmount),
+      badge: `${receivableCount} título${receivableCount !== 1 ? "s" : ""}`,
       badgeClass: "bg-blue-50 text-blue-700",
     },
     {
       label: "A pagar 7d",
-      value: fmt(Number(payable7d._sum.amount ?? 0)),
-      badge: `${payable7d._count.id} vencendo em breve`,
+      value: fmt(payable7dAmount),
+      badge: `${payable7dCount} vencendo em breve`,
       badgeClass: "bg-amber-50 text-amber-700",
     },
     {

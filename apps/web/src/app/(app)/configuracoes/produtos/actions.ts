@@ -20,16 +20,31 @@ export interface ProdutoPayload {
 
 export async function criarProduto(payload: ProdutoPayload) {
   const tenantId = getTenantId();
-  await db.produto.create({ data: { ...payload, tenantId } });
-  revalidatePath(PATH);
+  try {
+    await db.produto.create({ data: { ...payload, tenantId } });
+    revalidatePath(PATH);
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao salvar produto. Tente novamente.');
+  }
 }
 
 export async function atualizarProduto(id: string, payload: ProdutoPayload) {
-  await db.produto.update({ where: { id }, data: payload });
-  revalidatePath(PATH);
+  try {
+    await db.produto.update({ where: { id }, data: payload });
+    revalidatePath(PATH);
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao atualizar produto. Tente novamente.');
+  }
 }
 
 export async function toggleAtivoProduto(id: string, ativo: boolean) {
-  await db.produto.update({ where: { id }, data: { ativo } });
-  revalidatePath(PATH);
+  try {
+    await db.produto.update({ where: { id }, data: { ativo } });
+    revalidatePath(PATH);
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao atualizar produto. Tente novamente.');
+  }
 }

@@ -34,116 +34,128 @@ export interface ReceberNFPayload {
 
 export async function criarOrdem(payload: OrderPayload) {
   const tenantId = getTenantId();
-  const count = await db.purchaseOrder.count({ where: { tenantId } });
-  const number = `OC-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
+  try {
+    const count = await db.purchaseOrder.count({ where: { tenantId } });
+    const number = `OC-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
 
-  await db.purchaseOrder.create({
-    data: {
-      tenantId,
-      supplierId: payload.supplierId,
-      supplierName: payload.supplierName,
-      quoteId: payload.quoteId || null,
-      number,
-      issueDate: new Date(payload.issueDate),
-      expectedDate: payload.expectedDate ? new Date(payload.expectedDate) : null,
-      paymentTerms: payload.paymentTerms || null,
-      totalAmount: payload.totalAmount,
-      items: {
-        create: payload.items.map((i: OrderItemPayload) => ({
-          productId: i.productId,
-          quantity: i.quantity,
-          unitCost: i.unitCost,
-          totalCost: i.totalCost,
-          receivedQty: 0,
-        })),
+    await db.purchaseOrder.create({
+      data: {
+        tenantId,
+        supplierId: payload.supplierId,
+        supplierName: payload.supplierName,
+        quoteId: payload.quoteId || null,
+        number,
+        issueDate: new Date(payload.issueDate),
+        expectedDate: payload.expectedDate ? new Date(payload.expectedDate) : null,
+        paymentTerms: payload.paymentTerms || null,
+        totalAmount: payload.totalAmount,
+        items: {
+          create: payload.items.map((i: OrderItemPayload) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            unitCost: i.unitCost,
+            totalCost: i.totalCost,
+            receivedQty: 0,
+          })),
+        },
       },
-    },
-  });
+    });
 
-  revalidatePath("/compras/ordens");
+    revalidatePath("/compras/ordens");
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao salvar ordem. Tente novamente.');
+  }
 }
 
 export async function excluirOrdem(id: string) {
   const tenantId = getTenantId();
-  await db.purchaseOrder.delete({ where: { id, tenantId } });
-  revalidatePath("/compras/ordens");
+  try {
+    await db.purchaseOrder.delete({ where: { id, tenantId } });
+    revalidatePath("/compras/ordens");
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao excluir ordem. Tente novamente.');
+  }
 }
 
 export async function receberNF(payload: ReceberNFPayload) {
   const tenantId = getTenantId();
+  try {
+    const order = await db.purchaseOrder.findUnique({
+      where: { id: payload.orderId, tenantId },
+    });
+    if (!order) throw new Error("Ordem não encontrada");
 
-  const order = await db.purchaseOrder.findUnique({
-    where: { id: payload.orderId, tenantId },
-  });
-  if (!order) throw new Error("Ordem não encontrada");
+    await db.$transaction(async (tx) => {
+      for (const item of payload.items) {
+        if (item.receivedQty <= 0) continue;
 
-  await db.$transaction(async (tx) => {
-    for (const item of payload.items) {
-      if (item.receivedQty <= 0) continue;
+        await tx.purchaseOrderItem.update({
+          where: { id: item.itemId },
+          data: { receivedQty: item.receivedQty },
+        });
 
-      await tx.purchaseOrderItem.update({
-        where: { id: item.itemId },
-        data: { receivedQty: item.receivedQty },
-      });
-
-      // Entrada de estoque — accountType ESTOQUE_NF (mercadoria por nota fiscal,
-      // separada do físico até conferência)
-      await tx.stockMovement.create({
-        data: {
-          tenantId,
-          productId: item.productId,
-          warehouseId: payload.warehouseId,
-          accountType: AccountType.ESTOQUE_NF,
-          movementType: MovementType.ENTRADA,
-          quantity: item.receivedQty,
-          notes: `Recebimento NF ${payload.nfNumber} — ${order.number}`,
-        },
-      });
-
-      await tx.stockBalance.upsert({
-        where: {
-          tenantId_productId_warehouseId_accountType: {
+        await tx.stockMovement.create({
+          data: {
             tenantId,
             productId: item.productId,
             warehouseId: payload.warehouseId,
             accountType: AccountType.ESTOQUE_NF,
+            movementType: MovementType.ENTRADA,
+            quantity: item.receivedQty,
+            notes: `Recebimento NF ${payload.nfNumber} — ${order.number}`,
           },
-        },
-        create: {
+        });
+
+        await tx.stockBalance.upsert({
+          where: {
+            tenantId_productId_warehouseId_accountType: {
+              tenantId,
+              productId: item.productId,
+              warehouseId: payload.warehouseId,
+              accountType: AccountType.ESTOQUE_NF,
+            },
+          },
+          create: {
+            tenantId,
+            productId: item.productId,
+            warehouseId: payload.warehouseId,
+            accountType: AccountType.ESTOQUE_NF,
+            quantity: item.receivedQty,
+          },
+          update: { quantity: { increment: item.receivedQty } },
+        });
+      }
+
+      await tx.accountsPayable.create({
+        data: {
           tenantId,
-          productId: item.productId,
-          warehouseId: payload.warehouseId,
-          accountType: AccountType.ESTOQUE_NF,
-          quantity: item.receivedQty,
+          supplierId: order.supplierId,
+          supplierName: order.supplierName,
+          description: `NF ${payload.nfNumber} — ${order.number}`,
+          amount: payload.nfAmount,
+          dueDate: new Date(payload.dueDate),
         },
-        update: { quantity: { increment: item.receivedQty } },
       });
-    }
 
-    // Título a pagar com vencimento informado pelo operador
-    await tx.accountsPayable.create({
-      data: {
-        tenantId,
-        supplierId: order.supplierId,
-        supplierName: order.supplierName,
-        description: `NF ${payload.nfNumber} — ${order.number}`,
-        amount: payload.nfAmount,
-        dueDate: new Date(payload.dueDate),
-      },
+      await tx.purchaseOrder.update({
+        where: { id: payload.orderId },
+        data: {
+          status: OrderStatus.RECEIVED,
+          nfNumber: payload.nfNumber,
+          nfDate: new Date(payload.nfDate),
+          nfAmount: payload.nfAmount,
+        },
+      });
     });
 
-    await tx.purchaseOrder.update({
-      where: { id: payload.orderId },
-      data: {
-        status: OrderStatus.RECEIVED,
-        nfNumber: payload.nfNumber,
-        nfDate: new Date(payload.nfDate),
-        nfAmount: payload.nfAmount,
-      },
-    });
-  });
-
-  revalidatePath("/compras/ordens");
-  revalidatePath("/estoque");
-  revalidatePath("/financeiro/contas-a-pagar");
+    revalidatePath("/compras/ordens");
+    revalidatePath("/estoque");
+    revalidatePath("/financeiro/contas-a-pagar");
+  } catch (e) {
+    console.error('DB Error:', e);
+    if (e instanceof Error && e.message === "Ordem não encontrada") throw e;
+    throw new Error('Erro ao receber NF. Tente novamente.');
+  }
 }

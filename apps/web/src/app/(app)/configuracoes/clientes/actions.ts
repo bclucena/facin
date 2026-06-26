@@ -24,16 +24,31 @@ export interface ClientePayload {
 
 export async function criarCliente(payload: ClientePayload) {
   const tenantId = getTenantId();
-  await db.cliente.create({ data: { ...payload, tenantId } });
-  revalidatePath(PATH);
+  try {
+    await db.cliente.create({ data: { ...payload, tenantId } });
+    revalidatePath(PATH);
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao salvar cliente. Tente novamente.');
+  }
 }
 
 export async function atualizarCliente(id: string, payload: ClientePayload) {
-  await db.cliente.update({ where: { id }, data: payload });
-  revalidatePath(PATH);
+  try {
+    await db.cliente.update({ where: { id }, data: payload });
+    revalidatePath(PATH);
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao atualizar cliente. Tente novamente.');
+  }
 }
 
 export async function toggleAtivoCliente(id: string, ativo: boolean) {
-  await db.cliente.update({ where: { id }, data: { ativo } });
-  revalidatePath(PATH);
+  try {
+    await db.cliente.update({ where: { id }, data: { ativo } });
+    revalidatePath(PATH);
+  } catch (e) {
+    console.error('DB Error:', e);
+    throw new Error('Erro ao atualizar cliente. Tente novamente.');
+  }
 }

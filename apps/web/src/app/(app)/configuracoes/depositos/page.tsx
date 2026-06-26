@@ -6,9 +6,16 @@ import { DepositosView } from "./depositos-view";
 
 export default async function DepositosPage() {
   const tenantId = getTenantId();
-  const depositos = await db.deposito.findMany({
-    where: { tenantId },
-    orderBy: { nome: "asc" },
-  });
+
+  let depositos: any[] = [];
+  try {
+    depositos = await db.deposito.findMany({
+      where: { tenantId },
+      orderBy: { nome: "asc" },
+    });
+  } catch (e) {
+    console.error('DB Error:', e);
+  }
+
   return <DepositosView depositos={depositos} />;
 }
