@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "prebuild": "prisma generate --schema=../../packages/db/prisma/schema.prisma",
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@facin/config": "workspace:*",
     "@types/node": "^20.14.0",
+    "prisma": "^5.15.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
