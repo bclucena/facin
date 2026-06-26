@@ -14,7 +14,7 @@ out
 .env.*.local
 
 # Prisma generated
-packages/db/src/generated
+apps/web/src/generated
 
 # Logs
 *.log

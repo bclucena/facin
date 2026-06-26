@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../../apps/web/src/generated/prisma";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -15,7 +15,7 @@ export const db =
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
 
-export { Prisma, AccountType, MovementType, PaymentType, BillStatus, CashFlowType, QuoteStatus, OrderStatus, SalesOrderStatus } from "@prisma/client";
+export { Prisma, AccountType, MovementType, PaymentType, BillStatus, CashFlowType, QuoteStatus, OrderStatus, SalesOrderStatus } from "../../../apps/web/src/generated/prisma";
 export type {
   Tenant, User, Plan, UserRole,
   Cliente, Fornecedor, Produto, Deposito,
@@ -23,4 +23,4 @@ export type {
   AccountsPayable, AccountsReceivable, CashFlow,
   PurchaseQuote, PurchaseQuoteItem, PurchaseOrder, PurchaseOrderItem,
   SalesOrder, SalesOrderItem,
-} from "@prisma/client";
+} from "../../../apps/web/src/generated/prisma";
