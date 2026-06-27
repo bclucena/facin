@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { criarPedido } from "../actions";
 
 type ClienteOption = { id: string; nome: string; documento: string };
-type ProdutoOption = { id: string; codigo: string; descricao: string; unidade: string };
+type ProdutoOption = { id: string; codigo: string; descricao: string; unidade: string; precoVenda: number };
 
 const itemSchema = z.object({
   productId:   z.string().min(1, "Selecione o produto"),
@@ -223,7 +223,8 @@ export function NovoPedidoView({ clientes, produtos, tenantSlug }: { clientes: C
                             value={f.value}
                             onValueChange={(val) => {
                               f.onChange(val);
-                              // Preenche o preço com 0 (sem tabela de preços ainda)
+                              const preco = prodMap[val]?.precoVenda ?? 0;
+                              if (preco > 0) form.setValue(`items.${idx}.unitPrice`, preco, { shouldValidate: true });
                             }}
                           >
                             <SelectTrigger className={`h-8 text-sm ${itemErr?.productId ? "border-red-400" : ""}`}>

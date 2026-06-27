@@ -19,11 +19,11 @@ export default async function NovoPedidoPage({ params }: { params: { tenant: str
       db.produto.findMany({
         where: { tenantId, ativo: true },
         orderBy: { descricao: "asc" },
-        select: { id: true, codigo: true, descricao: true, unidade: true },
+        select: { id: true, codigo: true, descricao: true, unidade: true, precoVenda: true },
       }),
     ]);
     clientes = cls;
-    produtos = prods;
+    produtos = prods.map((p) => ({ ...p, precoVenda: Number(p.precoVenda) }));
   } catch (e) {
     console.error('DB Error:', e);
   }
