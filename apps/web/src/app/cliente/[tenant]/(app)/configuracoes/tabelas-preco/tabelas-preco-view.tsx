@@ -6,7 +6,7 @@ import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Plus, Pencil, Tag } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag } from "lucide-react";
 import { Button } from "@facin/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { criarTabela, atualizarTabela, toggleAtivoTabela } from "./actions";
+import { criarTabela, atualizarTabela, toggleAtivoTabela, deletarTabela } from "./actions";
 
 export type TabelaRow = {
   id: string;
@@ -96,6 +96,17 @@ export function TabelasPrecoView({ tabelas, tenantSlug }: { tabelas: TabelaRow[]
     }
   }
 
+  async function handleDelete(id: string) {
+    if (!confirm("Tem certeza? Esta ação não pode ser desfeita.")) return;
+    try {
+      await deletarTabela(tenantSlug, id);
+      toast.success("Tabela removida");
+      startTransition(() => router.refresh());
+    } catch {
+      toast.error("Erro ao remover tabela.");
+    }
+  }
+
   return (
     <>
       <div className="space-y-4 max-w-3xl">
@@ -162,6 +173,15 @@ export function TabelasPrecoView({ tabelas, tenantSlug }: { tabelas: TabelaRow[]
                           className="h-8 px-2 text-xs text-gray-500"
                         >
                           {item.ativo ? "Desativar" : "Ativar"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDelete(item.id)}
+                          disabled={isPending}
+                          className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 size={14} />
                         </Button>
                       </div>
                     </TableCell>

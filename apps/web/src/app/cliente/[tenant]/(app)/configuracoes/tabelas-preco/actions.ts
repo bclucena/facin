@@ -42,3 +42,14 @@ export async function toggleAtivoTabela(tenantSlug: string, id: string, ativo: b
     throw new Error("Erro ao atualizar tabela de preço. Tente novamente.");
   }
 }
+
+export async function deletarTabela(tenantSlug: string, id: string) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
+  try {
+    await db.tabelaPreco.delete({ where: { id, tenantId } });
+    revalidatePath("/", "layout");
+  } catch (e) {
+    console.error("DB Error:", e);
+    throw new Error("Erro ao deletar tabela");
+  }
+}
