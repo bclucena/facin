@@ -113,7 +113,7 @@ export function NovoPedidoView({ clientes, produtos, tenantSlug }: { clientes: C
         total,
       });
       toast.success("Pedido criado com sucesso");
-      router.push("/vendas/pedidos");
+      router.push(`/cliente/${tenantSlug}/vendas/pedidos`);
     } catch { toast.error("Erro ao criar pedido."); }
   }
 
