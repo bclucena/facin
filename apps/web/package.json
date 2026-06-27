@@ -8,7 +8,7 @@
     "start": "next start -p 3000",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "prebuild": "prisma generate --schema=../../packages/db/prisma/schema.prisma"
+    "prebuild": "prisma generate --schema=./prisma/schema.prisma"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.8",
