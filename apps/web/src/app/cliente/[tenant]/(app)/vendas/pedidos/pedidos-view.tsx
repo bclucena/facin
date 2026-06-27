@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Plus, CheckCircle, Receipt, XCircle } from "lucide-react";
+import { Plus, CheckCircle, Receipt, XCircle, Loader2, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@facin/ui";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { confirmarPedido, faturarPedido, cancelarPedido } from "./actions";
 
@@ -24,6 +25,9 @@ const STATUS_CONFIG = {
   CANCELLED: { label: "Cancelado",  class: "border-red-300 text-red-600 bg-red-50" },
 };
 
+type StatusKey = keyof typeof STATUS_CONFIG;
+type StatusFilter = "ALL" | StatusKey;
+
 type OrderRow = {
   id: string; number: string; clientName: string;
   issueDate: string; deliveryDate: string | null;
@@ -31,6 +35,16 @@ type OrderRow = {
   total: number; itemCount: number; notes: string | null;
 };
 type DepositoOption = { id: string; nome: string };
+
+type OrderDetail = {
+  id: string; number: string; clientName: string;
+  issueDate: string; deliveryDate: string | null; status: string;
+  subtotal: number; discountTotal: number; total: number; notes: string | null;
+  items: {
+    id: string; productCode: string; productName: string; productUnit: string;
+    quantity: number; unitPrice: number; discountPct: number; totalPrice: number;
+  }[];
+};
 
 const faturarSchema = z.object({
   warehouseId: z.string().min(1, "Selecione o depósito"),
@@ -51,17 +65,51 @@ function F({ label, error, children }: { label: string; error?: string; children
 const today = new Date().toISOString().slice(0, 10);
 const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
 
+const STATUS_FILTERS: { id: StatusFilter; label: string }[] = [
+  { id: "ALL", label: "Todos" },
+  { id: "DRAFT", label: "Rascunho" },
+  { id: "CONFIRMED", label: "Confirmado" },
+  { id: "INVOICED", label: "Faturado" },
+  { id: "CANCELLED", label: "Cancelado" },
+];
+
 export function PedidosView({ orders, depositos, tenantSlug }: { orders: OrderRow[]; depositos: DepositoOption[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [faturarOrder, setFaturarOrder] = useState<OrderRow | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detail, setDetail] = useState<OrderDetail | null>(null);
 
   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("pt-BR");
 
   const faturarForm = useForm<FaturarValues>({
     resolver: zodResolver(faturarSchema),
     defaultValues: { warehouseId: depositos[0]?.id ?? "", dueDate: in30 },
   });
+
+  const filteredOrders = statusFilter === "ALL"
+    ? orders
+    : orders.filter((o) => o.status === statusFilter);
+
+  async function openDetail(order: OrderRow) {
+    setDetail(null);
+    setDetailOpen(true);
+    setDetailLoading(true);
+    try {
+      const res = await fetch(`/api/cliente/${tenantSlug}/pedidos/${order.id}`);
+      if (!res.ok) throw new Error();
+      const data: OrderDetail = await res.json();
+      setDetail(data);
+    } catch {
+      toast.error("Erro ao carregar detalhes do pedido.");
+      setDetailOpen(false);
+    } finally {
+      setDetailLoading(false);
+    }
+  }
 
   function openFaturar(order: OrderRow) {
     setFaturarOrder(order);
@@ -98,6 +146,7 @@ export function PedidosView({ orders, depositos, tenantSlug }: { orders: OrderRo
       await cancelarPedido(tenantSlug, id);
       toast.success("Pedido cancelado");
       startTransition(() => router.refresh());
+      if (detail?.id === id) setDetailOpen(false);
     } catch { toast.error("Erro ao cancelar."); }
   }
 
@@ -139,6 +188,28 @@ export function PedidosView({ orders, depositos, tenantSlug }: { orders: OrderRo
           ))}
         </div>
 
+        {/* Status filter */}
+        <div className="flex items-center gap-1 flex-wrap">
+          {STATUS_FILTERS.map((f) => {
+            const count = f.id === "ALL" ? orders.length : orders.filter((o) => o.status === f.id).length;
+            const active = statusFilter === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => setStatusFilter(f.id)}
+                className={[
+                  "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                  active
+                    ? "bg-gray-900 text-white"
+                    : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900",
+                ].join(" ")}
+              >
+                {f.label} <span className={`ml-1 text-xs ${active ? "text-white/70" : "text-gray-400"}`}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
@@ -153,20 +224,30 @@ export function PedidosView({ orders, depositos, tenantSlug }: { orders: OrderRo
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.length === 0 ? (
+              {filteredOrders.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="py-16 text-center text-sm text-gray-400">
-                    Nenhum pedido encontrado.{" "}
-                    <Link href={`/cliente/${tenantSlug}/vendas/pedidos/novo`} className="text-[#0F5132] underline underline-offset-2">
-                      Criar primeiro pedido
-                    </Link>
+                    {statusFilter === "ALL" ? (
+                      <>Nenhum pedido encontrado.{" "}
+                        <Link href={`/cliente/${tenantSlug}/vendas/pedidos/novo`} className="text-[#0F5132] underline underline-offset-2">
+                          Criar primeiro pedido
+                        </Link>
+                      </>
+                    ) : `Nenhum pedido com status "${STATUS_CONFIG[statusFilter as StatusKey]?.label}".`}
                   </TableCell>
                 </TableRow>
-              ) : orders.map((o) => {
-                const cfg = STATUS_CONFIG[o.status as keyof typeof STATUS_CONFIG];
+              ) : filteredOrders.map((o) => {
+                const cfg = STATUS_CONFIG[o.status as StatusKey];
                 return (
                   <TableRow key={o.id} className={o.status === "CANCELLED" ? "opacity-50" : ""}>
-                    <TableCell className="font-mono text-sm font-medium">{o.number}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => openDetail(o)}
+                        className="font-mono text-sm font-medium text-[#0F5132] hover:underline underline-offset-2"
+                      >
+                        {o.number}
+                      </button>
+                    </TableCell>
                     <TableCell className="text-sm text-gray-500 whitespace-nowrap">
                       {new Date(o.issueDate).toLocaleDateString("pt-BR")}
                     </TableCell>
@@ -258,6 +339,142 @@ export function PedidosView({ orders, depositos, tenantSlug }: { orders: OrderRo
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Sheet — detalhes do pedido */}
+      <Sheet open={detailOpen} onOpenChange={(open) => { if (!open) { setDetailOpen(false); setDetail(null); } }}>
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+          {detailLoading ? (
+            <div className="flex items-center justify-center h-48">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            </div>
+          ) : detail ? (
+            <div className="space-y-6">
+              <SheetHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <SheetTitle className="font-mono text-lg">{detail.number}</SheetTitle>
+                  <Badge variant="outline" className={STATUS_CONFIG[detail.status as StatusKey]?.class}>
+                    {STATUS_CONFIG[detail.status as StatusKey]?.label}
+                  </Badge>
+                </div>
+              </SheetHeader>
+
+              {/* Info block */}
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Cliente</p>
+                  <p className="font-medium text-gray-800">{detail.clientName}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Status</p>
+                  <p className="font-medium">{STATUS_CONFIG[detail.status as StatusKey]?.label}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Emissão</p>
+                  <p className="font-medium tabular-nums">{fmtDate(detail.issueDate)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Entrega prevista</p>
+                  <p className="font-medium tabular-nums">{detail.deliveryDate ? fmtDate(detail.deliveryDate) : "—"}</p>
+                </div>
+                {detail.notes && (
+                  <div className="col-span-2">
+                    <p className="text-xs text-gray-400 mb-0.5">Observações</p>
+                    <p className="text-gray-600">{detail.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Items */}
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-2">Itens do pedido</p>
+                <div className="rounded-lg border border-gray-200 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead className="text-xs">Produto</TableHead>
+                        <TableHead className="text-xs text-right">Qtd</TableHead>
+                        <TableHead className="text-xs text-right">Preço unit.</TableHead>
+                        <TableHead className="text-xs text-right">Desc. %</TableHead>
+                        <TableHead className="text-xs text-right">Subtotal</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {detail.items.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="text-xs">
+                            <p className="font-medium">{item.productName}</p>
+                            <p className="text-gray-400 font-mono">{item.productCode}</p>
+                          </TableCell>
+                          <TableCell className="text-xs text-right tabular-nums">
+                            {item.quantity.toLocaleString("pt-BR", { minimumFractionDigits: 3 })} {item.productUnit}
+                          </TableCell>
+                          <TableCell className="text-xs text-right tabular-nums">{fmt(item.unitPrice)}</TableCell>
+                          <TableCell className="text-xs text-right tabular-nums">
+                            {item.discountPct > 0 ? `${item.discountPct.toFixed(2)}%` : "—"}
+                          </TableCell>
+                          <TableCell className="text-xs text-right tabular-nums font-semibold">{fmt(item.totalPrice)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {/* Footer totals */}
+              <div className="space-y-1.5 text-sm border-t border-gray-100 pt-4">
+                <div className="flex justify-between text-gray-500">
+                  <span>Subtotal</span>
+                  <span className="tabular-nums">{fmt(detail.subtotal)}</span>
+                </div>
+                {detail.discountTotal > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Desconto</span>
+                    <span className="tabular-nums">− {fmt(detail.discountTotal)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-gray-900 text-base pt-1 border-t border-gray-100">
+                  <span>Total</span>
+                  <span className="tabular-nums">{fmt(detail.total)}</span>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                {detail.status === "DRAFT" && (
+                  <button
+                    onClick={() => { onConfirmar(detail.id); setDetailOpen(false); }}
+                    className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 transition-colors"
+                  >
+                    <CheckCircle size={14} /> Confirmar
+                  </button>
+                )}
+                {detail.status === "CONFIRMED" && (
+                  <button
+                    onClick={() => { setDetailOpen(false); const row = orders.find((o) => o.id === detail.id); if (row) openFaturar(row); }}
+                    className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-[#0F5132] text-white hover:bg-[#0d4429] transition-colors"
+                  >
+                    <Receipt size={14} /> Faturar
+                  </button>
+                )}
+                {(detail.status === "DRAFT" || detail.status === "CONFIRMED") && (
+                  <button
+                    onClick={() => onCancelar(detail.id)}
+                    className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={14} /> Cancelar pedido
+                  </button>
+                )}
+                <Link
+                  href={`/cliente/${tenantSlug}/vendas/pedidos/novo?edit=${detail.id}`}
+                  className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900 transition-colors ml-auto"
+                >
+                  <Pencil size={14} /> Editar
+                </Link>
+              </div>
+            </div>
+          ) : null}
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

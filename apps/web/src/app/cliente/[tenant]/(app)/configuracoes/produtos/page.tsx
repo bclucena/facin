@@ -16,6 +16,7 @@ export default async function ProdutosPage({ params }: { params: { tenant: strin
     produtos = raw.map((p) => ({
       ...p,
       estoqueMinimo: Number(p.estoqueMinimo),
+      precoVenda: Number(p.precoVenda),
     }));
   } catch (e) {
     console.error('DB Error:', e);

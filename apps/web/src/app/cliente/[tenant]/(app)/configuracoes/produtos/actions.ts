@@ -15,6 +15,7 @@ export interface ProdutoPayload {
   grupo?: string;
   fabricante?: string;
   estoqueMinimo: number;
+  precoVenda: number;
   ativo: boolean;
 }
 

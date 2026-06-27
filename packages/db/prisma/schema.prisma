@@ -120,6 +120,7 @@ model Produto {
   grupo         String?
   fabricante    String?
   estoqueMinimo Decimal  @default(0) @db.Decimal(12, 3)
+  precoVenda    Decimal  @default(0) @db.Decimal(12, 2)
   ativo         Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

@@ -20,7 +20,7 @@ import { criarProduto, atualizarProduto, toggleAtivoProduto } from "./actions";
 export type ProdutoRow = {
   id: string; codigo: string; codigoBarras: string | null; descricao: string;
   unidade: string; tipo: string | null; grupo: string | null; fabricante: string | null;
-  estoqueMinimo: number; ativo: boolean;
+  estoqueMinimo: number; precoVenda: number; ativo: boolean;
 };
 
 const TIPOS = [
@@ -41,13 +41,14 @@ const schema = z.object({
   grupo: z.string().default(""),
   fabricante: z.string().default(""),
   estoqueMinimo: z.coerce.number().min(0).default(0),
+  precoVenda: z.coerce.number().min(0).default(0),
   ativo: z.boolean().default(true),
 });
 type ProdutoForm = z.infer<typeof schema>;
 
 const DEFAULT: ProdutoForm = {
   codigo: "", codigoBarras: "", descricao: "", unidade: "UN",
-  tipo: "REVENDA", grupo: "", fabricante: "", estoqueMinimo: 0, ativo: true,
+  tipo: "REVENDA", grupo: "", fabricante: "", estoqueMinimo: 0, precoVenda: 0, ativo: true,
 };
 
 function F({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
@@ -83,7 +84,8 @@ export function ProdutosView({ produtos, tenantSlug }: { produtos: ProdutoRow[];
       codigo: item.codigo, codigoBarras: item.codigoBarras ?? "",
       descricao: item.descricao, unidade: item.unidade,
       tipo: item.tipo ?? "REVENDA", grupo: item.grupo ?? "",
-      fabricante: item.fabricante ?? "", estoqueMinimo: item.estoqueMinimo, ativo: item.ativo,
+      fabricante: item.fabricante ?? "", estoqueMinimo: item.estoqueMinimo,
+      precoVenda: item.precoVenda, ativo: item.ativo,
     });
     setSheetOpen(true);
   }
@@ -105,6 +107,8 @@ export function ProdutosView({ produtos, tenantSlug }: { produtos: ProdutoRow[];
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao atualizar status."); }
   }
+
+  const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
     <>
@@ -129,7 +133,8 @@ export function ProdutosView({ produtos, tenantSlug }: { produtos: ProdutoRow[];
                 <TableHead>Unid.</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Grupo</TableHead>
-                <TableHead>Est. mín.</TableHead>
+                <TableHead className="text-right">Est. mín.</TableHead>
+                <TableHead className="text-right">Preço venda</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-28">Ações</TableHead>
               </TableRow>
@@ -137,7 +142,7 @@ export function ProdutosView({ produtos, tenantSlug }: { produtos: ProdutoRow[];
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-16 text-center">
+                  <TableCell colSpan={9} className="py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <Package className="h-10 w-10 text-gray-200" />
                       <p className="text-sm text-gray-400">
@@ -154,7 +159,8 @@ export function ProdutosView({ produtos, tenantSlug }: { produtos: ProdutoRow[];
                   <TableCell><span className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded">{item.unidade}</span></TableCell>
                   <TableCell className="text-xs text-gray-500">{TIPOS.find((t) => t.value === item.tipo)?.label ?? item.tipo ?? "—"}</TableCell>
                   <TableCell className="text-gray-500">{item.grupo || "—"}</TableCell>
-                  <TableCell className="text-gray-500">{item.estoqueMinimo > 0 ? item.estoqueMinimo : "—"}</TableCell>
+                  <TableCell className="text-right tabular-nums text-gray-500">{item.estoqueMinimo > 0 ? item.estoqueMinimo : "—"}</TableCell>
+                  <TableCell className="text-right tabular-nums font-medium">{item.precoVenda > 0 ? fmtBRL(item.precoVenda) : "—"}</TableCell>
                   <TableCell><Badge variant={item.ativo ? "success" : "secondary"}>{item.ativo ? "Ativo" : "Inativo"}</Badge></TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
@@ -209,7 +215,14 @@ export function ProdutosView({ produtos, tenantSlug }: { produtos: ProdutoRow[];
               <F label="Grupo"><Input placeholder="Ex: FARINHAS" className="uppercase" {...form.register("grupo")} /></F>
               <F label="Fabricante"><Input placeholder="Ex: Moinho Araçatuba" {...form.register("fabricante")} /></F>
             </div>
-            <F label="Estoque mínimo"><Input type="number" min={0} placeholder="0" {...form.register("estoqueMinimo")} /></F>
+            <div className="grid grid-cols-2 gap-3">
+              <F label="Estoque mínimo">
+                <Input type="number" min={0} step={0.001} placeholder="0" {...form.register("estoqueMinimo")} />
+              </F>
+              <F label="Preço de venda (R$)" error={form.formState.errors.precoVenda?.message}>
+                <Input type="number" min={0} step={0.01} placeholder="0,00" {...form.register("precoVenda")} />
+              </F>
+            </div>
             <Controller control={form.control} name="ativo" render={({ field }) => (
               <div className="flex items-center gap-3 py-2">
                 <Switch checked={field.value} onCheckedChange={field.onChange} id="prod-ativo" />
