@@ -4,51 +4,17 @@ import Link from "next/link";
 import { Users, Truck, Package, Warehouse, Tag, UserCog, ChevronRight } from "lucide-react";
 
 const modules = [
-  {
-    href: "/configuracoes/clientes",
-    icon: Users,
-    label: "Clientes",
-    description: "Cadastro de clientes e tabelas de crédito",
-    available: true,
-  },
-  {
-    href: "/configuracoes/fornecedores",
-    icon: Truck,
-    label: "Fornecedores",
-    description: "Fornecedores, prazos e condições de compra",
-    available: true,
-  },
-  {
-    href: "/configuracoes/produtos",
-    icon: Package,
-    label: "Produtos",
-    description: "Catálogo de produtos, grupos e fabricantes",
-    available: true,
-  },
-  {
-    href: "/configuracoes/depositos",
-    icon: Warehouse,
-    label: "Depósitos",
-    description: "Locais de armazenamento e separação",
-    available: true,
-  },
-  {
-    href: "/configuracoes/tabelas-preco",
-    icon: Tag,
-    label: "Tabelas de Preço",
-    description: "Configuração de tabelas e política de preços",
-    available: false,
-  },
-  {
-    href: "/configuracoes/usuarios",
-    icon: UserCog,
-    label: "Usuários",
-    description: "Permissões e acessos dos colaboradores",
-    available: false,
-  },
+  { href: "/configuracoes/clientes", icon: Users, label: "Clientes", description: "Cadastro de clientes e tabelas de crédito", available: true },
+  { href: "/configuracoes/fornecedores", icon: Truck, label: "Fornecedores", description: "Fornecedores, prazos e condições de compra", available: true },
+  { href: "/configuracoes/produtos", icon: Package, label: "Produtos", description: "Catálogo de produtos, grupos e fabricantes", available: true },
+  { href: "/configuracoes/depositos", icon: Warehouse, label: "Depósitos", description: "Locais de armazenamento e separação", available: true },
+  { href: "/configuracoes/tabelas-preco", icon: Tag, label: "Tabelas de Preço", description: "Configuração de tabelas e política de preços", available: false },
+  { href: "/configuracoes/usuarios", icon: UserCog, label: "Usuários", description: "Permissões e acessos dos colaboradores", available: false },
 ];
 
-export default function ConfiguracoesPage() {
+export default function ConfiguracoesPage({ params }: { params: { tenant: string } }) {
+  const base = `/cliente/${params.tenant}`;
+
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
@@ -61,7 +27,7 @@ export default function ConfiguracoesPage() {
           available ? (
             <Link
               key={href}
-              href={href}
+              href={`${base}${href}`}
               className="group flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
             >
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
@@ -84,9 +50,7 @@ export default function ConfiguracoesPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-semibold text-gray-600 text-sm">{label}</p>
-                  <span className="text-[10px] font-medium bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full">
-                    Em breve
-                  </span>
+                  <span className="text-[10px] font-medium bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full">Em breve</span>
                 </div>
                 <p className="text-xs text-gray-400 mt-0.5 truncate">{description}</p>
               </div>
