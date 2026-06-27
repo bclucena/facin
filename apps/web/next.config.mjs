@@ -9,6 +9,9 @@ const nextConfig = {
   transpilePackages: ['@facin/ui'],
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', '@prisma/engines'],
+    outputFileTracingIncludes: {
+      '/**/*': ['./node_modules/.prisma/client/**'],
+    },
   },
 }
 
