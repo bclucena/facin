@@ -11,8 +11,8 @@
     "prebuild": "prisma generate --schema=./prisma/schema.prisma"
   },
   "dependencies": {
-    "@clerk/localizations": "^4.11.0",
-    "@clerk/nextjs": "^7.5.8",
+    "@clerk/localizations": "^3.37.7",
+    "@clerk/nextjs": "^6.39.5",
     "@facin/db": "workspace:*",
     "@facin/ui": "workspace:*",
     "@hookform/resolvers": "^5.4.0",
