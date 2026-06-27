@@ -10,7 +10,7 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', '@prisma/engines'],
     outputFileTracingIncludes: {
-      '/**/*': ['./node_modules/.prisma/client/**'],
+      '/**/*': ['./.prisma/client/**'],
     },
   },
 }
