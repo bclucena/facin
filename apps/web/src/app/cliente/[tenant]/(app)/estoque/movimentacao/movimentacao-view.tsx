@@ -99,7 +99,7 @@ export function MovimentacaoView({
     <>
       <div className="space-y-4 max-w-6xl">
         <div className="flex items-center gap-3">
-          <Link href="/estoque" className="text-gray-400 hover:text-gray-600">
+          <Link href={`/cliente/${tenantSlug}/estoque`} className="text-gray-400 hover:text-gray-600">
             <ChevronLeft size={20} />
           </Link>
           <div className="flex-1">

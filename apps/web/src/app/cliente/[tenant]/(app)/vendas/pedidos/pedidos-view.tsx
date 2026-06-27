@@ -118,7 +118,7 @@ export function PedidosView({ orders, depositos, tenantSlug }: { orders: OrderRo
               {orders.length} pedidos — {totals.draft} rascunho · {totals.confirmed} confirmado · {totals.invoiced} faturado
             </p>
           </div>
-          <Link href="/vendas/pedidos/novo">
+          <Link href={`/cliente/${tenantSlug}/vendas/pedidos/novo`}>
             <Button className="gap-2" disabled={isPending}>
               <Plus size={16} /> Novo pedido
             </Button>
@@ -157,7 +157,7 @@ export function PedidosView({ orders, depositos, tenantSlug }: { orders: OrderRo
                 <TableRow>
                   <TableCell colSpan={7} className="py-16 text-center text-sm text-gray-400">
                     Nenhum pedido encontrado.{" "}
-                    <Link href="/vendas/pedidos/novo" className="text-[#0F5132] underline underline-offset-2">
+                    <Link href={`/cliente/${tenantSlug}/vendas/pedidos/novo`} className="text-[#0F5132] underline underline-offset-2">
                       Criar primeiro pedido
                     </Link>
                   </TableCell>

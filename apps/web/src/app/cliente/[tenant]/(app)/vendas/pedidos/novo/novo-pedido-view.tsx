@@ -121,7 +121,7 @@ export function NovoPedidoView({ clientes, produtos, tenantSlug }: { clientes: C
     <div className="max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link href="/vendas/pedidos" className="text-gray-400 hover:text-gray-600">
+        <Link href={`/cliente/${tenantSlug}/vendas/pedidos`} className="text-gray-400 hover:text-gray-600">
           <ChevronLeft size={20} />
         </Link>
         <div>
@@ -314,7 +314,7 @@ export function NovoPedidoView({ clientes, produtos, tenantSlug }: { clientes: C
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-2">
-          <Link href="/vendas/pedidos">
+          <Link href={`/cliente/${tenantSlug}/vendas/pedidos`}>
             <Button type="button" variant="outline">Cancelar</Button>
           </Link>
           <Button type="submit" disabled={form.formState.isSubmitting} className="px-8">

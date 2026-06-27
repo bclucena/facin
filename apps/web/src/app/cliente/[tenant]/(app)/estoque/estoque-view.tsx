@@ -37,7 +37,7 @@ function daysUntil(iso: string): number {
   return Math.floor((new Date(iso).getTime() - Date.now()) / 86_400_000);
 }
 
-export function EstoqueView({ balances, depositos }: { balances: StockRow[]; depositos: DepositoOption[] }) {
+export function EstoqueView({ balances, depositos, tenantSlug }: { balances: StockRow[]; depositos: DepositoOption[]; tenantSlug: string }) {
   const [search, setSearch] = useState("");
   const [filterWarehouse, setFilterWarehouse] = useState("ALL");
   const [filterAccount, setFilterAccount] = useState("ALL");
@@ -58,10 +58,10 @@ export function EstoqueView({ balances, depositos }: { balances: StockRow[]; dep
           <p className="text-sm text-gray-500 mt-0.5">{balances.length} posições</p>
         </div>
         <div className="flex gap-2">
-          <Link href="/estoque/movimentacao">
+          <Link href={`/cliente/${tenantSlug}/estoque/movimentacao`}>
             <Button variant="outline" size="sm">Movimentações</Button>
           </Link>
-          <Link href="/estoque/inventario">
+          <Link href={`/cliente/${tenantSlug}/estoque/inventario`}>
             <Button size="sm">Inventário</Button>
           </Link>
         </div>

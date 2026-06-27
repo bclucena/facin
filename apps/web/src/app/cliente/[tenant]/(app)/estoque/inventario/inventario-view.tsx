@@ -80,7 +80,7 @@ export function InventarioView({
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link href="/estoque" className="text-gray-400 hover:text-gray-600">
+        <Link href={`/cliente/${tenantSlug}/estoque`} className="text-gray-400 hover:text-gray-600">
           <ChevronLeft size={20} />
         </Link>
         <div>

@@ -135,7 +135,7 @@ export function CotacoesView({ quotes, fornecedores, produtos, tenantSlug }: { q
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Link href="/compras" className="text-gray-400 hover:text-gray-600">
+              <Link href={`/cliente/${tenantSlug}/compras`} className="text-gray-400 hover:text-gray-600">
                 <ChevronLeft size={18} />
               </Link>
               <h1 className="text-2xl font-bold text-gray-900">Cotações</h1>

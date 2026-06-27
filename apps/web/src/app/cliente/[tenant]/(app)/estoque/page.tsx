@@ -46,5 +46,5 @@ export default async function EstoquePage({ params }: { params: { tenant: string
     console.error('DB Error:', e);
   }
 
-  return <EstoqueView balances={balances} depositos={depositos} />;
+  return <EstoqueView balances={balances} depositos={depositos} tenantSlug={params.tenant} />;
 }
