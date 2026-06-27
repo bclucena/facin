@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db, CashFlowType } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 export interface CashFlowPayload {
   description: string;
@@ -13,7 +13,7 @@ export interface CashFlowPayload {
 }
 
 export async function criarLancamento(payload: CashFlowPayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.cashFlow.create({
       data: {
@@ -33,7 +33,7 @@ export async function criarLancamento(payload: CashFlowPayload) {
 }
 
 export async function excluirLancamento(id: string) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.cashFlow.delete({ where: { id, tenantId } });
     revalidatePath("/financeiro/fluxo-de-caixa");

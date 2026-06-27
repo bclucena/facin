@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 const PATH = "/configuracoes/fornecedores";
 
@@ -21,7 +21,7 @@ export interface FornecedorPayload {
 }
 
 export async function criarFornecedor(payload: FornecedorPayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.fornecedor.create({ data: { ...payload, tenantId } });
     revalidatePath(PATH);

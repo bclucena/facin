@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic'
 
 import { db } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 import { DepositosView } from "./depositos-view";
 
-export default async function DepositosPage() {
-  const tenantId = getTenantId();
+export default async function DepositosPage({ params }: { params: { tenant: string } }) {
+  const tenantId = getTenantIdFromSlug(params.tenant);
 
   let depositos: any[] = [];
   try {

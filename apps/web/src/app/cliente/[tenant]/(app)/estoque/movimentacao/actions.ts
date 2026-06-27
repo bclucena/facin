@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db, AccountType, MovementType } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 export interface MovimentacaoPayload {
   productId: string;
@@ -17,7 +17,7 @@ export interface MovimentacaoPayload {
 }
 
 export async function registrarMovimentacao(payload: MovimentacaoPayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.stockMovement.create({
       data: {

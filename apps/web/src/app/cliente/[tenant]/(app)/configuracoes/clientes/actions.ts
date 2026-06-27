@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 const PATH = "/configuracoes/clientes";
 
@@ -23,7 +23,7 @@ export interface ClientePayload {
 }
 
 export async function criarCliente(payload: ClientePayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.cliente.create({ data: { ...payload, tenantId } });
     revalidatePath(PATH);

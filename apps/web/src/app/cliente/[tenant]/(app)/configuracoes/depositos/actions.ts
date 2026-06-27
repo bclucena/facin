@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 const PATH = "/configuracoes/depositos";
 
 export async function criarDeposito(nome: string) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.deposito.create({ data: { nome: nome.toUpperCase(), tenantId, ativo: true } });
     revalidatePath(PATH);

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db, QuoteStatus, OrderStatus, type PurchaseQuoteItem } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 export interface QuoteItemPayload {
   productId: string;
@@ -22,7 +22,7 @@ export interface QuotePayload {
 }
 
 export async function criarCotacao(payload: QuotePayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     const count = await db.purchaseQuote.count({ where: { tenantId } });
     const number = `COT-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
@@ -56,7 +56,7 @@ export async function criarCotacao(payload: QuotePayload) {
 }
 
 export async function atualizarStatusCotacao(id: string, status: QuoteStatus) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.purchaseQuote.update({ where: { id, tenantId }, data: { status } });
     revalidatePath("/compras/cotacoes");
@@ -67,7 +67,7 @@ export async function atualizarStatusCotacao(id: string, status: QuoteStatus) {
 }
 
 export async function excluirCotacao(id: string) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.purchaseQuote.delete({ where: { id, tenantId } });
     revalidatePath("/compras/cotacoes");
@@ -78,7 +78,7 @@ export async function excluirCotacao(id: string) {
 }
 
 export async function converterParaOC(quoteId: string) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     const quote = await db.purchaseQuote.findUnique({
       where: { id: quoteId, tenantId },

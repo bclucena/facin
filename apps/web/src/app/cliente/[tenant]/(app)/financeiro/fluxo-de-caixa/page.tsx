@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic'
 
 import { db } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 import { FluxoView } from "./fluxo-view";
 
-export default async function FluxoDeCaixaPage() {
-  const tenantId = getTenantId();
+export default async function FluxoDeCaixaPage({ params }: { params: { tenant: string } }) {
+  const tenantId = getTenantIdFromSlug(params.tenant);
 
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1);

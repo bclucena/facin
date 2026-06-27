@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db, SalesOrderStatus, AccountType, MovementType, BillStatus } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 export interface SalesItemPayload {
   productId: string;
@@ -33,7 +33,7 @@ export interface FaturarPayload {
 }
 
 export async function criarPedido(payload: SalesOrderPayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     const count = await db.salesOrder.count({ where: { tenantId } });
     const number = `VDA-${new Date().getFullYear()}-${String(count + 1).padStart(4, "0")}`;
@@ -72,7 +72,7 @@ export async function criarPedido(payload: SalesOrderPayload) {
 }
 
 export async function confirmarPedido(id: string) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.salesOrder.update({
       where: { id, tenantId, status: SalesOrderStatus.DRAFT },
@@ -86,7 +86,7 @@ export async function confirmarPedido(id: string) {
 }
 
 export async function faturarPedido(payload: FaturarPayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     const order = await db.salesOrder.findUnique({
       where: { id: payload.orderId, tenantId },
@@ -158,7 +158,7 @@ export async function faturarPedido(payload: FaturarPayload) {
 }
 
 export async function cancelarPedido(id: string) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.salesOrder.update({
       where: { id, tenantId },

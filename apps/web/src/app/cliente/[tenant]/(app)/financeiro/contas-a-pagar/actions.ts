@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db, PaymentType, BillStatus } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 export interface PayablePayload {
   supplierId?: string;
@@ -21,7 +21,7 @@ export interface BaixaPayload {
 }
 
 export async function criarContaPagar(payload: PayablePayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.accountsPayable.create({
       data: {
@@ -42,7 +42,7 @@ export async function criarContaPagar(payload: PayablePayload) {
 }
 
 export async function editarContaPagar(id: string, payload: PayablePayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.accountsPayable.update({
       where: { id, tenantId },
@@ -63,7 +63,7 @@ export async function editarContaPagar(id: string, payload: PayablePayload) {
 }
 
 export async function excluirContaPagar(id: string) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.accountsPayable.delete({ where: { id, tenantId } });
     revalidatePath("/financeiro/contas-a-pagar");
@@ -74,7 +74,7 @@ export async function excluirContaPagar(id: string) {
 }
 
 export async function registrarBaixaPagar(payload: BaixaPayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.accountsPayable.update({
       where: { id: payload.id, tenantId },

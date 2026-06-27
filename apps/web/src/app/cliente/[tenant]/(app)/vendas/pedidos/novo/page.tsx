@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic'
 
 import { db } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 import { NovoPedidoView } from "./novo-pedido-view";
 
-export default async function NovoPedidoPage() {
-  const tenantId = getTenantId();
+export default async function NovoPedidoPage({ params }: { params: { tenant: string } }) {
+  const tenantId = getTenantIdFromSlug(params.tenant);
 
   let clientes: any[] = [];
   let produtos: any[] = [];

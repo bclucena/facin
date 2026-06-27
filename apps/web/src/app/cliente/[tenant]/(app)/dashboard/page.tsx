@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { db, BillStatus, CashFlowType } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 function fmt(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -15,8 +15,8 @@ function addDays(d: Date, n: number) {
   return new Date(d.getTime() + n * 86_400_000);
 }
 
-export default async function DashboardPage() {
-  const tenantId = getTenantId();
+export default async function DashboardPage({ params }: { params: { tenant: string } }) {
+  const tenantId = getTenantIdFromSlug(params.tenant);
   const firstName = "Usuário";
 
   const now = new Date();

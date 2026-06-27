@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db, AccountType, MovementType } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 export interface InventarioItem {
   productId: string;
@@ -15,7 +15,7 @@ export async function confirmarInventario(payload: {
   accountType: AccountType;
   items: InventarioItem[];
 }) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     const count = await db.inventoryCount.create({
       data: {

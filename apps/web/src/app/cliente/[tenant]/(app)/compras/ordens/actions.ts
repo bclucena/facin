@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db, AccountType, MovementType, OrderStatus } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 export interface OrderItemPayload {
   productId: string;
@@ -33,7 +33,7 @@ export interface ReceberNFPayload {
 }
 
 export async function criarOrdem(payload: OrderPayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     const count = await db.purchaseOrder.count({ where: { tenantId } });
     const number = `OC-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
@@ -69,7 +69,7 @@ export async function criarOrdem(payload: OrderPayload) {
 }
 
 export async function excluirOrdem(id: string) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.purchaseOrder.delete({ where: { id, tenantId } });
     revalidatePath("/compras/ordens");
@@ -80,7 +80,7 @@ export async function excluirOrdem(id: string) {
 }
 
 export async function receberNF(payload: ReceberNFPayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     const order = await db.purchaseOrder.findUnique({
       where: { id: payload.orderId, tenantId },

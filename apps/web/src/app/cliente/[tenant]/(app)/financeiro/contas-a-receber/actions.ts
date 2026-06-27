@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db, PaymentType, BillStatus } from "@facin/db";
-import { getTenantId } from "@/lib/tenant";
+import { getTenantIdFromSlug } from "@/lib/tenant";
 
 export interface ReceivablePayload {
   clientId?: string;
@@ -21,7 +21,7 @@ export interface BaixaPayload {
 }
 
 export async function criarContaReceber(payload: ReceivablePayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.accountsReceivable.create({
       data: {
@@ -42,7 +42,7 @@ export async function criarContaReceber(payload: ReceivablePayload) {
 }
 
 export async function editarContaReceber(id: string, payload: ReceivablePayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.accountsReceivable.update({
       where: { id, tenantId },
@@ -63,7 +63,7 @@ export async function editarContaReceber(id: string, payload: ReceivablePayload)
 }
 
 export async function excluirContaReceber(id: string) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.accountsReceivable.delete({ where: { id, tenantId } });
     revalidatePath("/financeiro/contas-a-receber");
@@ -74,7 +74,7 @@ export async function excluirContaReceber(id: string) {
 }
 
 export async function registrarBaixaReceber(payload: BaixaPayload) {
-  const tenantId = getTenantId();
+  const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.accountsReceivable.update({
       where: { id: payload.id, tenantId },
