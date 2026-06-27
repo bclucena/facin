@@ -71,6 +71,19 @@ model Cliente {
   @@map("clientes")
 }
 
+model TabelaPreco {
+  id        String   @id @default(cuid())
+  tenantId  String
+  nome      String
+  desconto  Decimal  @default(0) @db.Decimal(5, 2)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("tabelas_preco")
+}
+
 model Fornecedor {
   id            String   @id @default(cuid())
   tenantId      String
