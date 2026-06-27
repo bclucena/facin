@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { db } from "@facin/db";
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
