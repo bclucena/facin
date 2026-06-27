@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
-import { ptBR } from "@clerk/localizations";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Facin ERP",
+  title: "Facin",
   description: "Sistema de gestão para distribuidoras",
 };
 
@@ -17,10 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider localization={ptBR}>
-      <html lang="pt-BR">
-        <body className={inter.className}>{children}</body>
-      </html>
-    </ClerkProvider>
+    <html lang="pt-BR">
+      <body className={inter.className}>{children}</body>
+    </html>
   );
 }
