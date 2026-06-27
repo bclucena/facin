@@ -85,7 +85,7 @@ function resetFrom(item: ClienteRow): ClienteForm {
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export function ClientesView({ clientes }: { clientes: ClienteRow[] }) {
+export function ClientesView({ clientes, tenantSlug }: { clientes: ClienteRow[], tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
@@ -120,10 +120,10 @@ export function ClientesView({ clientes }: { clientes: ClienteRow[] }) {
   async function onSubmit(data: ClienteForm) {
     try {
       if (editing) {
-        await atualizarCliente(editing.id, data);
+        await atualizarCliente(tenantSlug, editing.id, data);
         toast.success("Cliente atualizado");
       } else {
-        await criarCliente(data);
+        await criarCliente(tenantSlug, data);
         toast.success("Cliente cadastrado");
       }
       closeSheet();
@@ -135,7 +135,7 @@ export function ClientesView({ clientes }: { clientes: ClienteRow[] }) {
 
   async function handleToggle(id: string, ativo: boolean) {
     try {
-      await toggleAtivoCliente(id, !ativo);
+      await toggleAtivoCliente(tenantSlug, id, !ativo);
       toast.success("Status atualizado");
       startTransition(() => router.refresh());
     } catch {

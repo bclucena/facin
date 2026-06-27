@@ -21,5 +21,5 @@ export default async function ClientesPage({ params }: { params: { tenant: strin
     console.error('DB Error:', e);
   }
 
-  return <ClientesView clientes={clientes} />;
+  return <ClientesView clientes={clientes} tenantSlug={params.tenant} />;
 }

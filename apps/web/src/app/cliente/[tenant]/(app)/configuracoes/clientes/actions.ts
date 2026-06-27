@@ -4,8 +4,6 @@ import { revalidatePath } from "next/cache";
 import { db } from "@facin/db";
 import { getTenantIdFromSlug } from "@/lib/tenant";
 
-const PATH = "/configuracoes/clientes";
-
 export interface ClientePayload {
   nome: string;
   documento: string;
@@ -22,33 +20,35 @@ export interface ClientePayload {
   ativo: boolean;
 }
 
-export async function criarCliente(payload: ClientePayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function criarCliente(tenantSlug: string, payload: ClientePayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.cliente.create({ data: { ...payload, tenantId } });
-    revalidatePath(PATH);
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
-    throw new Error('Erro ao salvar cliente. Tente novamente.');
+    throw new Error("Erro ao criar cliente");
   }
 }
 
-export async function atualizarCliente(id: string, payload: ClientePayload) {
+export async function atualizarCliente(tenantSlug: string, id: string, payload: Partial<ClientePayload>) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
-    await db.cliente.update({ where: { id }, data: payload });
-    revalidatePath(PATH);
+    await db.cliente.update({ where: { id, tenantId }, data: payload });
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
-    throw new Error('Erro ao atualizar cliente. Tente novamente.');
+    throw new Error("Erro ao atualizar cliente");
   }
 }
 
-export async function toggleAtivoCliente(id: string, ativo: boolean) {
+export async function toggleAtivoCliente(tenantSlug: string, id: string, ativo: boolean) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
-    await db.cliente.update({ where: { id }, data: { ativo } });
-    revalidatePath(PATH);
+    await db.cliente.update({ where: { id, tenantId }, data: { ativo } });
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
-    throw new Error('Erro ao atualizar cliente. Tente novamente.');
+    throw new Error("Erro ao atualizar cliente");
   }
 }
