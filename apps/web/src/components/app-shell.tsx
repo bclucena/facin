@@ -69,9 +69,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
+  // Extrai o prefixo do tenant da URL atual: /cliente/dom-padeiro/...
+  const tenantMatch = pathname.match(/^\/cliente\/([^/]+)/);
+  const tenantPrefix = tenantMatch ? `/cliente/${tenantMatch[1]}` : "";
+
+  function fullHref(href: string) {
+    return `${tenantPrefix}${href}`;
+  }
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Mobile backdrop */}
       {mobileOpen && (
         <div
           className="fixed inset-0 z-20 bg-black/50 md:hidden"
@@ -79,7 +86,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={[
           "fixed md:static inset-y-0 left-0 z-30",
@@ -89,7 +95,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         ].join(" ")}
       >
-        {/* Brand */}
         <div className="flex items-center gap-3 px-4 h-16 border-b border-white/10 flex-shrink-0">
           <div className="w-8 h-8 rounded-md bg-[#0F5132] flex items-center justify-center flex-shrink-0">
             <span className="text-sm font-bold text-white">F</span>
@@ -102,20 +107,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </div>
 
-        {/* Nav items */}
         <nav className="flex-1 py-3 overflow-y-auto">
           {navItems.map((item) => {
             const { href, icon: Icon, label, children } = item;
-            // For parent items with children, derive the base section path
-            const basePath = children ? "/" + href.split("/")[1] : href;
+            const fullPath = fullHref(href);
+            const basePath = tenantPrefix + "/" + href.split("/")[1];
             const isActive = children
               ? pathname.startsWith(basePath)
-              : pathname === href || pathname.startsWith(href + "/");
+              : pathname === fullPath || pathname.startsWith(fullPath + "/");
 
             return (
               <div key={href}>
                 <Link
-                  href={href}
+                  href={fullPath}
                   title={collapsed ? label : undefined}
                   onClick={() => setMobileOpen(false)}
                   className={[
@@ -130,15 +134,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   {!collapsed && <span className="truncate">{label}</span>}
                 </Link>
 
-                {/* Sub-menu — shown when expanded and parent is active */}
                 {children && !collapsed && isActive && (
                   <div className="mt-0.5 mb-1">
                     {children.map((child) => {
-                      const childActive = pathname === child.href || pathname.startsWith(child.href + "/");
+                      const childFull = fullHref(child.href);
+                      const childActive = pathname === childFull || pathname.startsWith(childFull + "/");
                       return (
                         <Link
                           key={child.href}
-                          href={child.href}
+                          href={childFull}
                           onClick={() => setMobileOpen(false)}
                           className={[
                             "flex items-center ml-9 mr-2 px-3 py-1.5 rounded-lg",
@@ -159,7 +163,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* Collapse toggle — desktop only */}
         <div className="hidden md:block p-3 border-t border-white/10 flex-shrink-0">
           <button
             onClick={() => setCollapsed(!collapsed)}
@@ -172,11 +175,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Main area */}
       <div className="flex flex-col flex-1 min-w-0">
-        {/* Top bar */}
         <header className="flex items-center gap-3 px-4 h-16 bg-white border-b border-gray-200 flex-shrink-0">
-          {/* Hamburger — mobile only */}
           <button
             className="md:hidden p-1.5 -ml-1 rounded-md hover:bg-gray-100 text-gray-600"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -185,12 +185,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Menu size={20} />
           </button>
 
-          {/* Tenant name — desktop only */}
           <span className="hidden md:block font-semibold text-sm text-gray-800 select-none">
             Dom Padeiro Distribuidora
           </span>
 
-          {/* Search */}
           <div className="flex-1 max-w-xs relative ml-2">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input
@@ -200,7 +198,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             />
           </div>
 
-          {/* Right actions */}
           <div className="flex items-center gap-2 ml-auto">
             <button
               className="relative p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
@@ -211,7 +208,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 overflow-auto p-6">
           {children}
         </main>
