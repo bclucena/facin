@@ -1,3 +1,5 @@
+import { PrismaPlugin } from '@prisma/nextjs-monorepo-workaround-plugin'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
@@ -9,9 +11,12 @@ const nextConfig = {
   transpilePackages: ['@facin/ui'],
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', '@prisma/engines'],
-    outputFileTracingIncludes: {
-      '/**/*': ['./node_modules/.prisma/client/**', './node_modules/@prisma/client/**'],
-    },
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.plugins = [...config.plugins, new PrismaPlugin()]
+    }
+    return config
   },
 }
 
