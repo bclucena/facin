@@ -42,7 +42,7 @@ export default async function TenantsPage() {
             <tbody className="divide-y divide-gray-100">
               {tenants.map((tenant) => (
                 <tr key={tenant.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">{tenant.name}</td>
+                  <td className="px-6 py-4 font-medium text-gray-900"><a href={`/tenants/${tenant.slug}`} className="hover:text-green-700 hover:underline">{tenant.name}</a></td>
                   <td className="px-6 py-4 text-gray-500 text-sm">{tenant.cnpj}</td>
                   <td className="px-6 py-4 text-gray-500 text-sm font-mono">{tenant.slug}</td>
                   <td className="px-6 py-4">
