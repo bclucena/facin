@@ -8,7 +8,7 @@ const modules = [
   { href: "/configuracoes/fornecedores", icon: Truck, label: "Fornecedores", description: "Fornecedores, prazos e condições de compra", available: true },
   { href: "/configuracoes/produtos", icon: Package, label: "Produtos", description: "Catálogo de produtos, grupos e fabricantes", available: true },
   { href: "/configuracoes/depositos", icon: Warehouse, label: "Depósitos", description: "Locais de armazenamento e separação", available: true },
-  { href: "/configuracoes/tabelas-preco", icon: Tag, label: "Tabelas de Preço", description: "Configuração de tabelas e política de preços", available: false },
+  { href: "/configuracoes/tabelas-preco", icon: Tag, label: "Tabelas de Preço", description: "Configuração de tabelas e política de preços", available: true },
   { href: "/configuracoes/usuarios", icon: UserCog, label: "Usuários", description: "Permissões e acessos dos colaboradores", available: false },
 ];
 
