@@ -53,5 +53,5 @@ export default async function MovimentacaoPage({ params }: { params: { tenant: s
     console.error('DB Error:', e);
   }
 
-  return <MovimentacaoView movements={movements} produtos={produtos} depositos={depositos} />;
+  return <MovimentacaoView movements={movements} produtos={produtos} depositos={depositos} tenantSlug={params.tenant} />;
 }

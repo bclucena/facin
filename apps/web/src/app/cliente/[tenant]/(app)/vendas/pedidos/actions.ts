@@ -32,8 +32,8 @@ export interface FaturarPayload {
   dueDate: string;
 }
 
-export async function criarPedido(payload: SalesOrderPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function criarPedido(tenantSlug: string, payload: SalesOrderPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     const count = await db.salesOrder.count({ where: { tenantId } });
     const number = `VDA-${new Date().getFullYear()}-${String(count + 1).padStart(4, "0")}`;
@@ -71,8 +71,8 @@ export async function criarPedido(payload: SalesOrderPayload) {
   }
 }
 
-export async function confirmarPedido(id: string) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function confirmarPedido(tenantSlug: string, id: string) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.salesOrder.update({
       where: { id, tenantId, status: SalesOrderStatus.DRAFT },
@@ -85,8 +85,8 @@ export async function confirmarPedido(id: string) {
   }
 }
 
-export async function faturarPedido(payload: FaturarPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function faturarPedido(tenantSlug: string, payload: FaturarPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     const order = await db.salesOrder.findUnique({
       where: { id: payload.orderId, tenantId },
@@ -157,8 +157,8 @@ export async function faturarPedido(payload: FaturarPayload) {
   }
 }
 
-export async function cancelarPedido(id: string) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function cancelarPedido(tenantSlug: string, id: string) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.salesOrder.update({
       where: { id, tenantId },

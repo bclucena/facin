@@ -28,5 +28,5 @@ export default async function NovoPedidoPage({ params }: { params: { tenant: str
     console.error('DB Error:', e);
   }
 
-  return <NovoPedidoView clientes={clientes} produtos={produtos} />;
+  return <NovoPedidoView clientes={clientes} produtos={produtos} tenantSlug={params.tenant} />;
 }

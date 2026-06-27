@@ -17,5 +17,5 @@ export default async function DepositosPage({ params }: { params: { tenant: stri
     console.error('DB Error:', e);
   }
 
-  return <DepositosView depositos={depositos} />;
+  return <DepositosView depositos={depositos} tenantSlug={params.tenant} />;
 }

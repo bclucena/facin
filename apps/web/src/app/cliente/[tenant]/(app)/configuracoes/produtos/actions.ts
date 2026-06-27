@@ -18,8 +18,8 @@ export interface ProdutoPayload {
   ativo: boolean;
 }
 
-export async function criarProduto(payload: ProdutoPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function criarProduto(tenantSlug: string, payload: ProdutoPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.produto.create({ data: { ...payload, tenantId } });
     revalidatePath(PATH);
@@ -29,9 +29,10 @@ export async function criarProduto(payload: ProdutoPayload) {
   }
 }
 
-export async function atualizarProduto(id: string, payload: ProdutoPayload) {
+export async function atualizarProduto(tenantSlug: string, id: string, payload: ProdutoPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
-    await db.produto.update({ where: { id }, data: payload });
+    await db.produto.update({ where: { id, tenantId }, data: payload });
     revalidatePath(PATH);
   } catch (e) {
     console.error('DB Error:', e);
@@ -39,9 +40,10 @@ export async function atualizarProduto(id: string, payload: ProdutoPayload) {
   }
 }
 
-export async function toggleAtivoProduto(id: string, ativo: boolean) {
+export async function toggleAtivoProduto(tenantSlug: string, id: string, ativo: boolean) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
-    await db.produto.update({ where: { id }, data: { ativo } });
+    await db.produto.update({ where: { id, tenantId }, data: { ativo } });
     revalidatePath(PATH);
   } catch (e) {
     console.error('DB Error:', e);

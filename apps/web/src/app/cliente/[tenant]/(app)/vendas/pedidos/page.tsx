@@ -41,5 +41,5 @@ export default async function PedidosPage({ params }: { params: { tenant: string
     console.error('DB Error:', e);
   }
 
-  return <PedidosView orders={orders} depositos={depositos} />;
+  return <PedidosView orders={orders} depositos={depositos} tenantSlug={params.tenant} />;
 }

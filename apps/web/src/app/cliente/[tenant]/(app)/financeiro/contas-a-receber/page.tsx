@@ -39,5 +39,5 @@ export default async function ContasReceberPage({ params }: { params: { tenant: 
     console.error('DB Error:', e);
   }
 
-  return <ContasReceberView bills={bills} clientes={clientes} />;
+  return <ContasReceberView bills={bills} clientes={clientes} tenantSlug={params.tenant} />;
 }

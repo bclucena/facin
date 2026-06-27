@@ -20,8 +20,8 @@ export interface BaixaPayload {
   paymentType: PaymentType;
 }
 
-export async function criarContaPagar(payload: PayablePayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function criarContaPagar(tenantSlug: string, payload: PayablePayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.accountsPayable.create({
       data: {
@@ -41,8 +41,8 @@ export async function criarContaPagar(payload: PayablePayload) {
   }
 }
 
-export async function editarContaPagar(id: string, payload: PayablePayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function editarContaPagar(tenantSlug: string, id: string, payload: PayablePayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.accountsPayable.update({
       where: { id, tenantId },
@@ -62,8 +62,8 @@ export async function editarContaPagar(id: string, payload: PayablePayload) {
   }
 }
 
-export async function excluirContaPagar(id: string) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function excluirContaPagar(tenantSlug: string, id: string) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.accountsPayable.delete({ where: { id, tenantId } });
     revalidatePath("/", "layout");
@@ -73,8 +73,8 @@ export async function excluirContaPagar(id: string) {
   }
 }
 
-export async function registrarBaixaPagar(payload: BaixaPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function registrarBaixaPagar(tenantSlug: string, payload: BaixaPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.accountsPayable.update({
       where: { id: payload.id, tenantId },

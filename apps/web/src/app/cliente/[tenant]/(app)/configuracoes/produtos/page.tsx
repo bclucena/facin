@@ -21,5 +21,5 @@ export default async function ProdutosPage({ params }: { params: { tenant: strin
     console.error('DB Error:', e);
   }
 
-  return <ProdutosView produtos={produtos} />;
+  return <ProdutosView produtos={produtos} tenantSlug={params.tenant} />;
 }

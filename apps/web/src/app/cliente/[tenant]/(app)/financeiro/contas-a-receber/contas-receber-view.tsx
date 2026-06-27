@@ -78,7 +78,7 @@ function F({ label, error, children }: { label: string; error?: string; children
   );
 }
 
-export function ContasReceberView({ bills, clientes }: { bills: BillRow[]; clientes: ClienteOption[] }) {
+export function ContasReceberView({ bills, clientes, tenantSlug }: { bills: BillRow[]; clientes: ClienteOption[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -127,10 +127,10 @@ export function ContasReceberView({ bills, clientes }: { bills: BillRow[]; clien
   async function onSubmit(data: BillForm) {
     try {
       if (editing) {
-        await editarContaReceber(editing.id, data);
+        await editarContaReceber(tenantSlug, editing.id, data);
         toast.success("Conta atualizada");
       } else {
-        await criarContaReceber(data);
+        await criarContaReceber(tenantSlug, data);
         toast.success("Conta criada");
       }
       setSheetOpen(false);
@@ -141,7 +141,7 @@ export function ContasReceberView({ bills, clientes }: { bills: BillRow[]; clien
   async function onDelete(id: string) {
     if (!confirm("Excluir esta conta?")) return;
     try {
-      await excluirContaReceber(id);
+      await excluirContaReceber(tenantSlug, id);
       toast.success("Conta excluída");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao excluir."); }
@@ -150,7 +150,7 @@ export function ContasReceberView({ bills, clientes }: { bills: BillRow[]; clien
   async function onReceive(data: BaixaForm) {
     if (!paying) return;
     try {
-      await registrarBaixaReceber({ id: paying.id, receivedAt: data.receivedAt, receivedAmount: data.receivedAmount, paymentType: data.paymentType as PaymentType });
+      await registrarBaixaReceber(tenantSlug, { id: paying.id, receivedAt: data.receivedAt, receivedAmount: data.receivedAmount, paymentType: data.paymentType as PaymentType });
       toast.success("Recebimento registrado");
       setPayOpen(false);
       startTransition(() => router.refresh());

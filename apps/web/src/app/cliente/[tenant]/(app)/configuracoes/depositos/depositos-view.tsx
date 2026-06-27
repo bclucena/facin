@@ -34,7 +34,7 @@ function F({ label, error, children }: { label: string; error?: string; children
   );
 }
 
-export function DepositosView({ depositos }: { depositos: DepositoRow[] }) {
+export function DepositosView({ depositos, tenantSlug }: { depositos: DepositoRow[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
@@ -52,10 +52,10 @@ export function DepositosView({ depositos }: { depositos: DepositoRow[] }) {
   async function onSubmit(data: DepositoForm) {
     try {
       if (editing) {
-        await atualizarDeposito(editing.id, data.nome, data.ativo);
+        await atualizarDeposito(tenantSlug, editing.id, data.nome, data.ativo);
         toast.success("Depósito atualizado");
       } else {
-        await criarDeposito(data.nome);
+        await criarDeposito(tenantSlug, data.nome);
         toast.success("Depósito cadastrado");
       }
       closeSheet();
@@ -65,7 +65,7 @@ export function DepositosView({ depositos }: { depositos: DepositoRow[] }) {
 
   async function handleToggle(id: string, ativo: boolean) {
     try {
-      await toggleAtivoDeposito(id, !ativo);
+      await toggleAtivoDeposito(tenantSlug, id, !ativo);
       toast.success("Status atualizado");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao atualizar status."); }

@@ -31,5 +31,5 @@ export default async function FluxoDeCaixaPage({ params }: { params: { tenant: s
     console.error('DB Error:', e);
   }
 
-  return <FluxoView entries={entries} defaultMonth={start.toISOString().slice(0, 7)} />;
+  return <FluxoView entries={entries} defaultMonth={start.toISOString().slice(0, 7)} tenantSlug={params.tenant} />;
 }

@@ -84,12 +84,13 @@ const DEFAULT_CREATE: CreateValues = {
   items: [{ productId: "", quantity: 1, unitCost: 0 }],
 };
 
-export function OrdensView({ orders, fornecedores, produtos, depositos, quotes }: {
+export function OrdensView({ orders, fornecedores, produtos, depositos, quotes, tenantSlug }: {
   orders: OrderRow[];
   fornecedores: FornecedorOption[];
   produtos: ProdutoOption[];
   depositos: DepositoOption[];
   quotes: QuoteOption[];
+  tenantSlug: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -108,7 +109,7 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes }
   async function onCreateSubmit(data: CreateValues) {
     const supplier = fornecedores.find((f) => f.id === data.supplierId);
     try {
-      await criarOrdem({
+      await criarOrdem(tenantSlug, {
         supplierId: data.supplierId,
         supplierName: supplier?.nome ?? "",
         quoteId: data.quoteId || undefined,
@@ -133,7 +134,7 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes }
   async function onDelete(id: string) {
     if (!confirm("Excluir esta ordem de compra?")) return;
     try {
-      await excluirOrdem(id);
+      await excluirOrdem(tenantSlug, id);
       toast.success("Ordem excluída");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao excluir."); }
@@ -160,7 +161,7 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes }
   async function onReceberSubmit(data: ReceberValues) {
     if (!receberOrder) return;
     try {
-      await receberNF({
+      await receberNF(tenantSlug, {
         orderId: receberOrder.id,
         nfNumber: data.nfNumber,
         nfDate: data.nfDate,

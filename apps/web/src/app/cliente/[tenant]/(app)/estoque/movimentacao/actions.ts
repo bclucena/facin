@@ -16,8 +16,8 @@ export interface MovimentacaoPayload {
   notes?: string;
 }
 
-export async function registrarMovimentacao(payload: MovimentacaoPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function registrarMovimentacao(tenantSlug: string, payload: MovimentacaoPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.stockMovement.create({
       data: {

@@ -60,7 +60,7 @@ function F({ label, error, children }: { label: string; error?: string; children
   );
 }
 
-export function ProdutosView({ produtos }: { produtos: ProdutoRow[] }) {
+export function ProdutosView({ produtos, tenantSlug }: { produtos: ProdutoRow[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
@@ -91,7 +91,7 @@ export function ProdutosView({ produtos }: { produtos: ProdutoRow[] }) {
 
   async function onSubmit(data: ProdutoForm) {
     try {
-      editing ? await atualizarProduto(editing.id, data) : await criarProduto(data);
+      editing ? await atualizarProduto(tenantSlug, editing.id, data) : await criarProduto(tenantSlug, data);
       toast.success(editing ? "Produto atualizado" : "Produto cadastrado");
       closeSheet();
       startTransition(() => router.refresh());
@@ -100,7 +100,7 @@ export function ProdutosView({ produtos }: { produtos: ProdutoRow[] }) {
 
   async function handleToggle(id: string, ativo: boolean) {
     try {
-      await toggleAtivoProduto(id, !ativo);
+      await toggleAtivoProduto(tenantSlug, id, !ativo);
       toast.success("Status atualizado");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao atualizar status."); }

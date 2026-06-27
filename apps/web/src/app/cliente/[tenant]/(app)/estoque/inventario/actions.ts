@@ -10,12 +10,12 @@ export interface InventarioItem {
   countedQty: number;
 }
 
-export async function confirmarInventario(payload: {
+export async function confirmarInventario(tenantSlug: string, payload: {
   warehouseId: string;
   accountType: AccountType;
   items: InventarioItem[];
 }) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     const count = await db.inventoryCount.create({
       data: {

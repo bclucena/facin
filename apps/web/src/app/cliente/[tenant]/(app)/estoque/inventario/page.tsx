@@ -29,5 +29,5 @@ export default async function InventarioPage({ params }: { params: { tenant: str
     console.error('DB Error:', e);
   }
 
-  return <InventarioView depositos={depositos} produtos={produtos} balances={balances} />;
+  return <InventarioView depositos={depositos} produtos={produtos} balances={balances} tenantSlug={params.tenant} />;
 }

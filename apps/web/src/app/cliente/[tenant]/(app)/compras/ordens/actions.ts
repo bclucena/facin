@@ -32,8 +32,8 @@ export interface ReceberNFPayload {
   dueDate: string;
 }
 
-export async function criarOrdem(payload: OrderPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function criarOrdem(tenantSlug: string, payload: OrderPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     const count = await db.purchaseOrder.count({ where: { tenantId } });
     const number = `OC-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
@@ -68,8 +68,8 @@ export async function criarOrdem(payload: OrderPayload) {
   }
 }
 
-export async function excluirOrdem(id: string) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function excluirOrdem(tenantSlug: string, id: string) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.purchaseOrder.delete({ where: { id, tenantId } });
     revalidatePath("/", "layout");
@@ -79,8 +79,8 @@ export async function excluirOrdem(id: string) {
   }
 }
 
-export async function receberNF(payload: ReceberNFPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function receberNF(tenantSlug: string, payload: ReceberNFPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     const order = await db.purchaseOrder.findUnique({
       where: { id: payload.orderId, tenantId },

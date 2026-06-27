@@ -64,7 +64,7 @@ function F({ label, error, children }: { label: string; error?: string; children
 const today = new Date().toISOString().slice(0, 10);
 const DEFAULT: FormValues = { supplierId: "", issueDate: today, expectedDate: "", paymentTerms: "", items: [{ productId: "", quantity: 1, unitCost: 0 }] };
 
-export function CotacoesView({ quotes, fornecedores, produtos }: { quotes: QuoteRow[]; fornecedores: FornecedorOption[]; produtos: ProdutoOption[] }) {
+export function CotacoesView({ quotes, fornecedores, produtos, tenantSlug }: { quotes: QuoteRow[]; fornecedores: FornecedorOption[]; produtos: ProdutoOption[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -87,7 +87,7 @@ export function CotacoesView({ quotes, fornecedores, produtos }: { quotes: Quote
       totalCost: rowTotal(i),
     }));
     try {
-      await criarCotacao({
+      await criarCotacao(tenantSlug, {
         supplierId: data.supplierId,
         supplierName: supplier?.nome ?? "",
         issueDate: data.issueDate,
@@ -106,7 +106,7 @@ export function CotacoesView({ quotes, fornecedores, produtos }: { quotes: Quote
   async function onDelete(id: string) {
     if (!confirm("Excluir esta cotação?")) return;
     try {
-      await excluirCotacao(id);
+      await excluirCotacao(tenantSlug, id);
       toast.success("Cotação excluída");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao excluir."); }
@@ -114,7 +114,7 @@ export function CotacoesView({ quotes, fornecedores, produtos }: { quotes: Quote
 
   async function onMarkSent(id: string) {
     try {
-      await atualizarStatusCotacao(id, "SENT" as QuoteStatus);
+      await atualizarStatusCotacao(tenantSlug, id, "SENT" as QuoteStatus);
       toast.success("Cotação marcada como enviada");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro."); }
@@ -123,7 +123,7 @@ export function CotacoesView({ quotes, fornecedores, produtos }: { quotes: Quote
   async function onConvert(id: string) {
     if (!confirm("Converter esta cotação em Ordem de Compra?")) return;
     try {
-      await converterParaOC(id);
+      await converterParaOC(tenantSlug, id);
       toast.success("Ordem de compra criada");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao converter."); }

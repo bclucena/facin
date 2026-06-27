@@ -20,8 +20,8 @@ export interface FornecedorPayload {
   ativo: boolean;
 }
 
-export async function criarFornecedor(payload: FornecedorPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function criarFornecedor(tenantSlug: string, payload: FornecedorPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.fornecedor.create({ data: { ...payload, tenantId } });
     revalidatePath(PATH);
@@ -31,9 +31,10 @@ export async function criarFornecedor(payload: FornecedorPayload) {
   }
 }
 
-export async function atualizarFornecedor(id: string, payload: FornecedorPayload) {
+export async function atualizarFornecedor(tenantSlug: string, id: string, payload: FornecedorPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
-    await db.fornecedor.update({ where: { id }, data: payload });
+    await db.fornecedor.update({ where: { id, tenantId }, data: payload });
     revalidatePath(PATH);
   } catch (e) {
     console.error('DB Error:', e);
@@ -41,9 +42,10 @@ export async function atualizarFornecedor(id: string, payload: FornecedorPayload
   }
 }
 
-export async function toggleAtivoFornecedor(id: string, ativo: boolean) {
+export async function toggleAtivoFornecedor(tenantSlug: string, id: string, ativo: boolean) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
-    await db.fornecedor.update({ where: { id }, data: { ativo } });
+    await db.fornecedor.update({ where: { id, tenantId }, data: { ativo } });
     revalidatePath(PATH);
   } catch (e) {
     console.error('DB Error:', e);

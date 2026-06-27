@@ -58,8 +58,8 @@ function F({ label, error, children }: { label: string; error?: string; children
 }
 
 export function MovimentacaoView({
-  movements, produtos, depositos,
-}: { movements: MovementRow[]; produtos: ProdutoOption[]; depositos: DepositoOption[] }) {
+  movements, produtos, depositos, tenantSlug,
+}: { movements: MovementRow[]; produtos: ProdutoOption[]; depositos: DepositoOption[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -77,7 +77,7 @@ export function MovimentacaoView({
 
   async function onSubmit(data: MovForm) {
     try {
-      await registrarMovimentacao({
+      await registrarMovimentacao(tenantSlug, {
         productId: data.productId,
         warehouseId: data.warehouseId,
         accountType: data.accountType as "ESTOQUE_NF" | "ESTOQUE" | "ESTOQUE_FISICO",

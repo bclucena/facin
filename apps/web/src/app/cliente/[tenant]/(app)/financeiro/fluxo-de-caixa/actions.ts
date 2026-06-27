@@ -12,8 +12,8 @@ export interface CashFlowPayload {
   referenceDate: string;
 }
 
-export async function criarLancamento(payload: CashFlowPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function criarLancamento(tenantSlug: string, payload: CashFlowPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.cashFlow.create({
       data: {
@@ -32,8 +32,8 @@ export async function criarLancamento(payload: CashFlowPayload) {
   }
 }
 
-export async function excluirLancamento(id: string) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function excluirLancamento(tenantSlug: string, id: string) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.cashFlow.delete({ where: { id, tenantId } });
     revalidatePath("/", "layout");

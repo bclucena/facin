@@ -20,8 +20,8 @@ export interface BaixaPayload {
   paymentType: PaymentType;
 }
 
-export async function criarContaReceber(payload: ReceivablePayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function criarContaReceber(tenantSlug: string, payload: ReceivablePayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.accountsReceivable.create({
       data: {
@@ -41,8 +41,8 @@ export async function criarContaReceber(payload: ReceivablePayload) {
   }
 }
 
-export async function editarContaReceber(id: string, payload: ReceivablePayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function editarContaReceber(tenantSlug: string, id: string, payload: ReceivablePayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.accountsReceivable.update({
       where: { id, tenantId },
@@ -62,8 +62,8 @@ export async function editarContaReceber(id: string, payload: ReceivablePayload)
   }
 }
 
-export async function excluirContaReceber(id: string) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function excluirContaReceber(tenantSlug: string, id: string) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.accountsReceivable.delete({ where: { id, tenantId } });
     revalidatePath("/", "layout");
@@ -73,8 +73,8 @@ export async function excluirContaReceber(id: string) {
   }
 }
 
-export async function registrarBaixaReceber(payload: BaixaPayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function registrarBaixaReceber(tenantSlug: string, payload: BaixaPayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.accountsReceivable.update({
       where: { id: payload.id, tenantId },

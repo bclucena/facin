@@ -83,6 +83,7 @@ export default async function OrdensPage({ params }: { params: { tenant: string 
       produtos={produtos}
       depositos={depositos}
       quotes={quotes}
+      tenantSlug={params.tenant}
     />
   );
 }

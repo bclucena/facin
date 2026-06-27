@@ -61,7 +61,7 @@ function F({ label, error, children }: { label: string; error?: string; children
   );
 }
 
-export function FornecedoresView({ fornecedores }: { fornecedores: FornecedorRow[] }) {
+export function FornecedoresView({ fornecedores, tenantSlug }: { fornecedores: FornecedorRow[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
@@ -89,7 +89,7 @@ export function FornecedoresView({ fornecedores }: { fornecedores: FornecedorRow
 
   async function onSubmit(data: FornecedorForm) {
     try {
-      editing ? await atualizarFornecedor(editing.id, data) : await criarFornecedor(data);
+      editing ? await atualizarFornecedor(tenantSlug, editing.id, data) : await criarFornecedor(tenantSlug, data);
       toast.success(editing ? "Fornecedor atualizado" : "Fornecedor cadastrado");
       closeSheet();
       startTransition(() => router.refresh());
@@ -98,7 +98,7 @@ export function FornecedoresView({ fornecedores }: { fornecedores: FornecedorRow
 
   async function handleToggle(id: string, ativo: boolean) {
     try {
-      await toggleAtivoFornecedor(id, !ativo);
+      await toggleAtivoFornecedor(tenantSlug, id, !ativo);
       toast.success("Status atualizado");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao atualizar status."); }

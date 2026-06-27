@@ -67,7 +67,7 @@ function BRLAxis(value: number) {
   return value >= 1000 ? `R$${(value / 1000).toFixed(0)}k` : `R$${value}`;
 }
 
-export function FluxoView({ entries, defaultMonth }: { entries: CashEntry[]; defaultMonth: string }) {
+export function FluxoView({ entries, defaultMonth, tenantSlug }: { entries: CashEntry[]; defaultMonth: string; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -87,7 +87,7 @@ export function FluxoView({ entries, defaultMonth }: { entries: CashEntry[]; def
 
   async function onSubmit(data: EntryForm) {
     try {
-      await criarLancamento({ ...data, type: data.type as CashFlowType });
+      await criarLancamento(tenantSlug, { ...data, type: data.type as CashFlowType });
       toast.success("Lançamento criado");
       setSheetOpen(false);
       form.reset();
@@ -98,7 +98,7 @@ export function FluxoView({ entries, defaultMonth }: { entries: CashEntry[]; def
   async function onDelete(id: string) {
     if (!confirm("Excluir este lançamento?")) return;
     try {
-      await excluirLancamento(id);
+      await excluirLancamento(tenantSlug, id);
       toast.success("Lançamento excluído");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao excluir."); }

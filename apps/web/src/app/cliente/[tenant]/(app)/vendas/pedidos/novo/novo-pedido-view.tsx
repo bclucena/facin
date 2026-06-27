@@ -49,7 +49,7 @@ const DEFAULT: FormValues = {
   items: [{ productId: "", quantity: 1, unitPrice: 0, discountPct: 0 }],
 };
 
-export function NovoPedidoView({ clientes, produtos }: { clientes: ClienteOption[]; produtos: ProdutoOption[] }) {
+export function NovoPedidoView({ clientes, produtos, tenantSlug }: { clientes: ClienteOption[]; produtos: ProdutoOption[]; tenantSlug: string }) {
   const router = useRouter();
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema) as Resolver<FormValues>, defaultValues: DEFAULT });
@@ -101,7 +101,7 @@ export function NovoPedidoView({ clientes, produtos }: { clientes: ClienteOption
     });
 
     try {
-      await criarPedido({
+      await criarPedido(tenantSlug, {
         clientId: data.clientId || undefined,
         clientName: data.clientName,
         issueDate: data.issueDate,

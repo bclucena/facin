@@ -22,8 +22,8 @@ const ACCOUNT_LABELS: Record<string, string> = { ESTOQUE_NF: "Estoque NF", ESTOQ
 type WizardItem = { productId: string; codigo: string; descricao: string; unidade: string; systemQty: number; countedQty: number };
 
 export function InventarioView({
-  depositos, produtos, balances,
-}: { depositos: DepositoOption[]; produtos: ProdutoOption[]; balances: BalanceRecord[] }) {
+  depositos, produtos, balances, tenantSlug,
+}: { depositos: DepositoOption[]; produtos: ProdutoOption[]; balances: BalanceRecord[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -61,7 +61,7 @@ export function InventarioView({
 
   async function handleConfirm() {
     try {
-      await confirmarInventario({
+      await confirmarInventario(tenantSlug, {
         warehouseId,
         accountType: accountType as "ESTOQUE_NF" | "ESTOQUE" | "ESTOQUE_FISICO",
         items: items.map((it) => ({ productId: it.productId, systemQty: it.systemQty, countedQty: it.countedQty })),

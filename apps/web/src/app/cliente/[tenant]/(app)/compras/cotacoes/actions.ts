@@ -21,8 +21,8 @@ export interface QuotePayload {
   totalAmount: number;
 }
 
-export async function criarCotacao(payload: QuotePayload) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function criarCotacao(tenantSlug: string, payload: QuotePayload) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     const count = await db.purchaseQuote.count({ where: { tenantId } });
     const number = `COT-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
@@ -55,8 +55,8 @@ export async function criarCotacao(payload: QuotePayload) {
   }
 }
 
-export async function atualizarStatusCotacao(id: string, status: QuoteStatus) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function atualizarStatusCotacao(tenantSlug: string, id: string, status: QuoteStatus) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.purchaseQuote.update({ where: { id, tenantId }, data: { status } });
     revalidatePath("/", "layout");
@@ -66,8 +66,8 @@ export async function atualizarStatusCotacao(id: string, status: QuoteStatus) {
   }
 }
 
-export async function excluirCotacao(id: string) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function excluirCotacao(tenantSlug: string, id: string) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     await db.purchaseQuote.delete({ where: { id, tenantId } });
     revalidatePath("/", "layout");
@@ -77,8 +77,8 @@ export async function excluirCotacao(id: string) {
   }
 }
 
-export async function converterParaOC(quoteId: string) {
-  const tenantId = getTenantIdFromSlug(params.tenant);
+export async function converterParaOC(tenantSlug: string, quoteId: string) {
+  const tenantId = getTenantIdFromSlug(tenantSlug);
   try {
     const quote = await db.purchaseQuote.findUnique({
       where: { id: quoteId, tenantId },

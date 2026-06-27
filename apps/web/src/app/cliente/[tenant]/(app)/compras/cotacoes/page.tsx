@@ -57,5 +57,5 @@ export default async function CotacoesPage({ params }: { params: { tenant: strin
     console.error('DB Error:', e);
   }
 
-  return <CotacoesView quotes={quotes} fornecedores={fornecedores} produtos={produtos} />;
+  return <CotacoesView quotes={quotes} fornecedores={fornecedores} produtos={produtos} tenantSlug={params.tenant} />;
 }

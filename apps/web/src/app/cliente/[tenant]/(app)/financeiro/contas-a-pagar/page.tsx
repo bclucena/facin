@@ -39,5 +39,5 @@ export default async function ContasPagarPage({ params }: { params: { tenant: st
     console.error('DB Error:', e);
   }
 
-  return <ContasPagarView bills={bills} fornecedores={fornecedores} />;
+  return <ContasPagarView bills={bills} fornecedores={fornecedores} tenantSlug={params.tenant} />;
 }

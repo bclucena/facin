@@ -51,7 +51,7 @@ function F({ label, error, children }: { label: string; error?: string; children
 const today = new Date().toISOString().slice(0, 10);
 const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
 
-export function PedidosView({ orders, depositos }: { orders: OrderRow[]; depositos: DepositoOption[] }) {
+export function PedidosView({ orders, depositos, tenantSlug }: { orders: OrderRow[]; depositos: DepositoOption[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [faturarOrder, setFaturarOrder] = useState<OrderRow | null>(null);
@@ -74,7 +74,7 @@ export function PedidosView({ orders, depositos }: { orders: OrderRow[]; deposit
   async function onConfirmar(id: string) {
     if (!confirm("Confirmar este pedido?")) return;
     try {
-      await confirmarPedido(id);
+      await confirmarPedido(tenantSlug, id);
       toast.success("Pedido confirmado");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao confirmar."); }
@@ -83,7 +83,7 @@ export function PedidosView({ orders, depositos }: { orders: OrderRow[]; deposit
   async function onFaturar(data: FaturarValues) {
     if (!faturarOrder) return;
     try {
-      await faturarPedido({ orderId: faturarOrder.id, warehouseId: data.warehouseId, dueDate: data.dueDate });
+      await faturarPedido(tenantSlug, { orderId: faturarOrder.id, warehouseId: data.warehouseId, dueDate: data.dueDate });
       toast.success("Pedido faturado — estoque e CR atualizados");
       setFaturarOrder(null);
       startTransition(() => router.refresh());
@@ -95,7 +95,7 @@ export function PedidosView({ orders, depositos }: { orders: OrderRow[]; deposit
   async function onCancelar(id: string) {
     if (!confirm("Cancelar este pedido? Esta ação não desfaz integrações já realizadas.")) return;
     try {
-      await cancelarPedido(id);
+      await cancelarPedido(tenantSlug, id);
       toast.success("Pedido cancelado");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao cancelar."); }

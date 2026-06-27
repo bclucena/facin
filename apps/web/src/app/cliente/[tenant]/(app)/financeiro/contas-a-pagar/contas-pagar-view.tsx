@@ -80,7 +80,7 @@ function F({ label, error, children }: { label: string; error?: string; children
   );
 }
 
-export function ContasPagarView({ bills, fornecedores }: { bills: BillRow[]; fornecedores: FornecedorOption[] }) {
+export function ContasPagarView({ bills, fornecedores, tenantSlug }: { bills: BillRow[]; fornecedores: FornecedorOption[]; tenantSlug: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -129,10 +129,10 @@ export function ContasPagarView({ bills, fornecedores }: { bills: BillRow[]; for
   async function onSubmit(data: BillForm) {
     try {
       if (editing) {
-        await editarContaPagar(editing.id, data);
+        await editarContaPagar(tenantSlug, editing.id, data);
         toast.success("Conta atualizada");
       } else {
-        await criarContaPagar(data);
+        await criarContaPagar(tenantSlug, data);
         toast.success("Conta criada");
       }
       setSheetOpen(false);
@@ -143,7 +143,7 @@ export function ContasPagarView({ bills, fornecedores }: { bills: BillRow[]; for
   async function onDelete(id: string) {
     if (!confirm("Excluir esta conta?")) return;
     try {
-      await excluirContaPagar(id);
+      await excluirContaPagar(tenantSlug, id);
       toast.success("Conta excluída");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao excluir."); }
@@ -152,7 +152,7 @@ export function ContasPagarView({ bills, fornecedores }: { bills: BillRow[]; for
   async function onPay(data: BaixaForm) {
     if (!paying) return;
     try {
-      await registrarBaixaPagar({ id: paying.id, paidAt: data.paidAt, paidAmount: data.paidAmount, paymentType: data.paymentType as PaymentType });
+      await registrarBaixaPagar(tenantSlug, { id: paying.id, paidAt: data.paidAt, paidAmount: data.paidAmount, paymentType: data.paymentType as PaymentType });
       toast.success("Pagamento registrado");
       setPayOpen(false);
       startTransition(() => router.refresh());

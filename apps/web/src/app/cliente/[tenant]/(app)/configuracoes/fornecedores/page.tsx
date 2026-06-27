@@ -17,5 +17,5 @@ export default async function FornecedoresPage({ params }: { params: { tenant: s
     console.error('DB Error:', e);
   }
 
-  return <FornecedoresView fornecedores={fornecedores} />;
+  return <FornecedoresView fornecedores={fornecedores} tenantSlug={params.tenant} />;
 }
