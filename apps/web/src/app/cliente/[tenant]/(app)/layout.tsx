@@ -1,7 +1,8 @@
+export const dynamic = 'force-dynamic'
+
 import { Toaster } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { db } from "@facin/db";
-import { getTenantIdFromSlug } from "@/lib/tenant";
 
 export default async function AppLayout({ 
   children,
