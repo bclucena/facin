@@ -148,8 +148,6 @@ export async function faturarPedido(tenantSlug: string, payload: FaturarPayload)
     });
 
     revalidatePath("/", "layout");
-    revalidatePath("/", "layout");
-    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     if (e instanceof Error && ["Pedido não encontrado", "Pedido já faturado"].includes(e.message)) throw e;
