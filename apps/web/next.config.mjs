@@ -1,4 +1,6 @@
-import { PrismaPlugin } from '@prisma/nextjs-monorepo-workaround-plugin'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+const { PrismaPlugin } = require('@prisma/nextjs-monorepo-workaround-plugin')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
