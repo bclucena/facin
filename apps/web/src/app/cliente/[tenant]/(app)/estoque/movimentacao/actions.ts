@@ -62,8 +62,8 @@ export async function registrarMovimentacao(payload: MovimentacaoPayload) {
       },
     });
 
-    revalidatePath("/estoque");
-    revalidatePath("/estoque/movimentacao");
+    revalidatePath("/", "layout");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao registrar movimentação. Tente novamente.');

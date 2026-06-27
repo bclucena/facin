@@ -25,7 +25,7 @@ export async function criarLancamento(payload: CashFlowPayload) {
         referenceDate: new Date(payload.referenceDate),
       },
     });
-    revalidatePath("/financeiro/fluxo-de-caixa");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao salvar lançamento. Tente novamente.');
@@ -36,7 +36,7 @@ export async function excluirLancamento(id: string) {
   const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.cashFlow.delete({ where: { id, tenantId } });
-    revalidatePath("/financeiro/fluxo-de-caixa");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao excluir lançamento. Tente novamente.');

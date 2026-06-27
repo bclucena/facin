@@ -64,7 +64,7 @@ export async function criarPedido(payload: SalesOrderPayload) {
       },
     });
 
-    revalidatePath("/vendas/pedidos");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao salvar pedido. Tente novamente.');
@@ -78,7 +78,7 @@ export async function confirmarPedido(id: string) {
       where: { id, tenantId, status: SalesOrderStatus.DRAFT },
       data: { status: SalesOrderStatus.CONFIRMED },
     });
-    revalidatePath("/vendas/pedidos");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao confirmar pedido. Tente novamente.');
@@ -147,9 +147,9 @@ export async function faturarPedido(payload: FaturarPayload) {
       });
     });
 
-    revalidatePath("/vendas/pedidos");
-    revalidatePath("/estoque");
-    revalidatePath("/financeiro/contas-a-receber");
+    revalidatePath("/", "layout");
+    revalidatePath("/", "layout");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     if (e instanceof Error && ["Pedido não encontrado", "Pedido já faturado"].includes(e.message)) throw e;
@@ -164,7 +164,7 @@ export async function cancelarPedido(id: string) {
       where: { id, tenantId },
       data: { status: SalesOrderStatus.CANCELLED },
     });
-    revalidatePath("/vendas/pedidos");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao cancelar pedido. Tente novamente.');

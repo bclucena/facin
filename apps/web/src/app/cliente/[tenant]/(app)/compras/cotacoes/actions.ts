@@ -48,7 +48,7 @@ export async function criarCotacao(payload: QuotePayload) {
       },
     });
 
-    revalidatePath("/compras/cotacoes");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao salvar cotação. Tente novamente.');
@@ -59,7 +59,7 @@ export async function atualizarStatusCotacao(id: string, status: QuoteStatus) {
   const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.purchaseQuote.update({ where: { id, tenantId }, data: { status } });
-    revalidatePath("/compras/cotacoes");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao atualizar cotação. Tente novamente.');
@@ -70,7 +70,7 @@ export async function excluirCotacao(id: string) {
   const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.purchaseQuote.delete({ where: { id, tenantId } });
-    revalidatePath("/compras/cotacoes");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao excluir cotação. Tente novamente.');
@@ -118,8 +118,8 @@ export async function converterParaOC(quoteId: string) {
       }),
     ]);
 
-    revalidatePath("/compras/cotacoes");
-    revalidatePath("/compras/ordens");
+    revalidatePath("/", "layout");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     if (e instanceof Error && e.message === "Cotação não encontrada") throw e;

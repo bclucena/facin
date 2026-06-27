@@ -34,7 +34,7 @@ export async function criarContaPagar(payload: PayablePayload) {
         notes: payload.notes || null,
       },
     });
-    revalidatePath("/financeiro/contas-a-pagar");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao salvar conta. Tente novamente.');
@@ -55,7 +55,7 @@ export async function editarContaPagar(id: string, payload: PayablePayload) {
         notes: payload.notes || null,
       },
     });
-    revalidatePath("/financeiro/contas-a-pagar");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao atualizar conta. Tente novamente.');
@@ -66,7 +66,7 @@ export async function excluirContaPagar(id: string) {
   const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.accountsPayable.delete({ where: { id, tenantId } });
-    revalidatePath("/financeiro/contas-a-pagar");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao excluir conta. Tente novamente.');
@@ -103,8 +103,8 @@ export async function registrarBaixaPagar(payload: BaixaPayload) {
       });
     }
 
-    revalidatePath("/financeiro/contas-a-pagar");
-    revalidatePath("/financeiro/fluxo-de-caixa");
+    revalidatePath("/", "layout");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao registrar baixa. Tente novamente.');

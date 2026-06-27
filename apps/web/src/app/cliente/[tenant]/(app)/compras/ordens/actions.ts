@@ -61,7 +61,7 @@ export async function criarOrdem(payload: OrderPayload) {
       },
     });
 
-    revalidatePath("/compras/ordens");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao salvar ordem. Tente novamente.');
@@ -72,7 +72,7 @@ export async function excluirOrdem(id: string) {
   const tenantId = getTenantIdFromSlug(params.tenant);
   try {
     await db.purchaseOrder.delete({ where: { id, tenantId } });
-    revalidatePath("/compras/ordens");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao excluir ordem. Tente novamente.');
@@ -150,9 +150,9 @@ export async function receberNF(payload: ReceberNFPayload) {
       });
     });
 
-    revalidatePath("/compras/ordens");
-    revalidatePath("/estoque");
-    revalidatePath("/financeiro/contas-a-pagar");
+    revalidatePath("/", "layout");
+    revalidatePath("/", "layout");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     if (e instanceof Error && e.message === "Ordem não encontrada") throw e;

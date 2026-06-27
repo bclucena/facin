@@ -73,8 +73,8 @@ export async function confirmarInventario(payload: {
       }
     }
 
-    revalidatePath("/estoque");
-    revalidatePath("/estoque/inventario");
+    revalidatePath("/", "layout");
+    revalidatePath("/", "layout");
   } catch (e) {
     console.error('DB Error:', e);
     throw new Error('Erro ao confirmar inventário. Tente novamente.');
