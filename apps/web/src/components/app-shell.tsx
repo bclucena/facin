@@ -96,7 +96,7 @@ export function AppShell({ children, tenantName, primaryColor }: { children: Rea
         ].join(" ")}
       >
         <div className="flex items-center gap-3 px-4 h-16 border-b border-white/10 flex-shrink-0">
-          <div className="w-8 h-8 rounded-md bg-[#0F5132] flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: primaryColor ?? '#0F5132' }}>
             <span className="text-sm font-bold text-white">F</span>
           </div>
           {!collapsed && (
@@ -126,9 +126,10 @@ export function AppShell({ children, tenantName, primaryColor }: { children: Rea
                     "flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg",
                     "text-sm transition-colors duration-150",
                     isActive
-                      ? "bg-[#0F5132] text-white"
+                      ? "text-white"
                       : "text-white/60 hover:text-white hover:bg-white/10",
                   ].join(" ")}
+                  style={isActive ? { backgroundColor: primaryColor ?? '#0F5132' } : undefined}
                 >
                   <Icon size={18} className="flex-shrink-0" />
                   {!collapsed && <span className="truncate">{label}</span>}
