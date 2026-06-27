@@ -64,7 +64,7 @@ const navItems: NavItem[] = [
   { href: "/configuracoes", icon: Settings, label: "Configurações" },
 ];
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, tenantName, primaryColor }: { children: React.ReactNode, tenantName?: string, primaryColor?: string }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -101,7 +101,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
-              <p className="text-sm font-semibold leading-tight truncate">Dom Padeiro</p>
+              <p className="text-sm font-semibold leading-tight truncate">{tenantName ?? "Facin ERP"}</p>
               <p className="text-xs text-white/40 leading-tight">Distribuidora</p>
             </div>
           )}
@@ -185,8 +185,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Menu size={20} />
           </button>
 
-          <span className="hidden md:block font-semibold text-sm text-gray-800 select-none">
-            Dom Padeiro Distribuidora
+          <span className="hidden md:block font-semibold text-sm text-gray-800 select-none" style={{ color: primaryColor }}>
+            {tenantName ?? "Facin ERP"}
           </span>
 
           <div className="flex-1 max-w-xs relative ml-2">
