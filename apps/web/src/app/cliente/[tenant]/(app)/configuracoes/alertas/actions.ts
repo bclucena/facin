@@ -13,15 +13,9 @@ export async function criarAlerta(
   data: { diasAntes: number; tipo: "PAGAR" | "RECEBER" | "AMBOS" }
 ) {
   const tenantId = resolveTenantId(tenantSlug);
-  console.log("[criarAlerta] tenantSlug:", tenantSlug, "tenantId:", tenantId, "data:", data);
-  try {
-    await db.alertConfig.create({
-      data: { tenantId, diasAntes: data.diasAntes, tipo: data.tipo },
-    });
-  } catch (e) {
-    console.error("[criarAlerta] ERRO:", e);
-    throw e;
-  }
+  await db.alertConfig.create({
+    data: { tenantId, diasAntes: data.diasAntes, tipo: data.tipo },
+  });
   revalidatePath("/", "layout");
 }
 
