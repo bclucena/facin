@@ -44,7 +44,6 @@ export async function GET(
     });
   } catch (e) {
     console.error("DB Error:", e);
-    const msg = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: "Internal error", detail: msg }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
