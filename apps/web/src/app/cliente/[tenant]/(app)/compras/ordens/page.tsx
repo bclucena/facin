@@ -29,7 +29,7 @@ export default async function OrdensPage({ params }: { params: { tenant: string 
       db.produto.findMany({
         where: { tenantId, ativo: true },
         orderBy: { descricao: "asc" },
-        select: { id: true, codigo: true, descricao: true, unidade: true },
+        select: { id: true, codigo: true, descricao: true, unidade: true, precoVenda: true },
       }),
       db.deposito.findMany({
         where: { tenantId, ativo: true },
@@ -69,7 +69,7 @@ export default async function OrdensPage({ params }: { params: { tenant: string 
       })),
     }));
     fornecedores = forn;
-    produtos = prods;
+    produtos = prods.map((p: any) => ({ ...p, precoVenda: Number(p.precoVenda) }));
     depositos = deps;
     quotes = rawQuotes;
   } catch (e) {

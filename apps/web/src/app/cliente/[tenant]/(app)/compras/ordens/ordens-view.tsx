@@ -37,7 +37,7 @@ type OrderRow = {
 };
 type DepositoOption = { id: string; nome: string };
 type FornecedorOption = { id: string; nome: string };
-type ProdutoOption = { id: string; codigo: string; descricao: string; unidade: string };
+type ProdutoOption = { id: string; codigo: string; descricao: string; unidade: string; precoVenda: number };
 type QuoteOption = { id: string; number: string; supplierName: string };
 
 // --- Schema: criar OC manualmente ---
@@ -100,6 +100,7 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes, 
   const [detailOrder, setDetailOrder] = useState<OrderRow | null>(null);
 
   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const prodMap = Object.fromEntries(produtos.map((p) => [p.id, p]));
 
   // --- Criar OC form ---
   const createForm = useForm<CreateValues>({ resolver: zodResolver(createSchema) as Resolver<CreateValues>, defaultValues: DEFAULT_CREATE });
@@ -478,7 +479,11 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes, 
                       <tr key={field.id}>
                         <td className="px-2 py-1.5">
                           <Controller control={createForm.control} name={`items.${idx}.productId`} render={({ field: f }) => (
-                            <Select value={f.value} onValueChange={f.onChange}>
+                            <Select value={f.value} onValueChange={(val) => {
+                              f.onChange(val);
+                              const preco = prodMap[val]?.precoVenda ?? 0;
+                              if (preco > 0) createForm.setValue(`items.${idx}.unitCost`, preco, { shouldValidate: true });
+                            }}>
                               <SelectTrigger className="h-7 text-xs">
                                 <SelectValue placeholder="Selecione..." />
                               </SelectTrigger>

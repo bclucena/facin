@@ -34,7 +34,7 @@ export type QuoteRow = {
   status: string; totalAmount: number; itemCount: number; items: QuoteItem[];
 };
 type FornecedorOption = { id: string; nome: string };
-type ProdutoOption   = { id: string; codigo: string; descricao: string; unidade: string };
+type ProdutoOption   = { id: string; codigo: string; descricao: string; unidade: string; precoVenda: number };
 
 const itemSchema = z.object({
   productId: z.string().min(1, "Selecione o produto"),
@@ -79,6 +79,7 @@ export function CotacoesView({ quotes, fornecedores, produtos, tenantSlug }: { q
   const grandTotal = watchItems.reduce((s, _, i) => s + rowTotal(i), 0);
 
   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const prodMap = Object.fromEntries(produtos.map((p) => [p.id, p]));
 
   async function onSubmit(data: FormValues) {
     const supplier = fornecedores.find((f) => f.id === data.supplierId);
@@ -131,8 +132,8 @@ export function CotacoesView({ quotes, fornecedores, produtos, tenantSlug }: { q
     if (!confirm("Converter esta cotação em Ordem de Compra?")) return;
     try {
       await converterParaOC(tenantSlug, id);
-      toast.success("Ordem de compra criada");
-      startTransition(() => router.refresh());
+      toast.success("Cotação convertida em Ordem de Compra com sucesso");
+      router.push(`/cliente/${tenantSlug}/compras/ordens`);
     } catch { toast.error("Erro ao converter."); }
   }
 
@@ -405,7 +406,11 @@ export function CotacoesView({ quotes, fornecedores, produtos, tenantSlug }: { q
                       <tr key={field.id}>
                         <td className="px-2 py-1.5">
                           <Controller control={form.control} name={`items.${idx}.productId`} render={({ field: f }) => (
-                            <Select value={f.value} onValueChange={f.onChange}>
+                            <Select value={f.value} onValueChange={(val) => {
+                              f.onChange(val);
+                              const preco = prodMap[val]?.precoVenda ?? 0;
+                              if (preco > 0) form.setValue(`items.${idx}.unitCost`, preco, { shouldValidate: true });
+                            }}>
                               <SelectTrigger className="h-7 text-xs">
                                 <SelectValue placeholder="Selecione..." />
                               </SelectTrigger>
