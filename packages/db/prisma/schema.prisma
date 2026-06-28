@@ -410,6 +410,20 @@ model SalesOrderItem {
   @@map("sales_order_items")
 }
 
+// ─── Alertas ─────────────────────────────────────────────────────────────────
+
+model AlertConfig {
+  id        String    @id @default(cuid())
+  tenantId  String
+  diasAntes Int
+  tipo      AlertTipo
+  ativo     Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  @@index([tenantId])
+  @@map("alert_configs")
+}
+
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum Plan {
@@ -472,4 +486,10 @@ enum SalesOrderStatus {
   CONFIRMED
   INVOICED
   CANCELLED
+}
+
+enum AlertTipo {
+  PAGAR
+  RECEBER
+  AMBOS
 }

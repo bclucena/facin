@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -13,6 +13,7 @@ import {
   BarChart3,
   Settings,
   Menu,
+  AlignJustify,
   Bell,
   Search,
   ChevronLeft,
@@ -64,14 +65,33 @@ const navItems: NavItem[] = [
   { href: "/configuracoes", icon: Settings, label: "Configurações" },
 ];
 
+type AlertItem = {
+  id: string;
+  description: string;
+  amount: number;
+  dueDate: string;
+  tipo: "PAGAR" | "RECEBER";
+};
+
 export function AppShell({ children, tenantName, primaryColor }: { children: React.ReactNode, tenantName?: string, primaryColor?: string }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertData, setAlertData] = useState<{ count: number; items: AlertItem[] }>({ count: 0, items: [] });
   const pathname = usePathname();
 
   // Extrai o prefixo do tenant da URL atual: /cliente/dom-padeiro/...
   const tenantMatch = pathname.match(/^\/cliente\/([^/]+)/);
   const tenantPrefix = tenantMatch ? `/cliente/${tenantMatch[1]}` : "";
+  const tenantSlug = tenantMatch?.[1];
+
+  useEffect(() => {
+    if (!tenantSlug) return;
+    fetch(`/api/cliente/${tenantSlug}/alertas`)
+      .then((r) => (r.ok ? r.json() : { count: 0, items: [] }))
+      .then(setAlertData)
+      .catch(() => {});
+  }, [tenantSlug]);
 
   function fullHref(href: string) {
     return `${tenantPrefix}${href}`;
@@ -177,7 +197,7 @@ export function AppShell({ children, tenantName, primaryColor }: { children: Rea
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex items-center gap-3 px-4 h-16 bg-white border-b border-gray-200 flex-shrink-0">
+        <header className="flex items-center gap-2 px-4 h-16 bg-white border-b border-gray-200 flex-shrink-0">
           <button
             className="md:hidden p-1.5 -ml-1 rounded-md hover:bg-gray-100 text-gray-600"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -186,11 +206,9 @@ export function AppShell({ children, tenantName, primaryColor }: { children: Rea
             <Menu size={20} />
           </button>
 
-          <span className="hidden md:block font-semibold text-sm text-gray-800 select-none" style={{ color: primaryColor }}>
-            {tenantName ?? "Facin ERP"}
-          </span>
+          <div className="flex-1" />
 
-          <div className="flex-1 max-w-xs relative ml-2">
+          <div className="w-56 relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input
               type="text"
@@ -199,12 +217,94 @@ export function AppShell({ children, tenantName, primaryColor }: { children: Rea
             />
           </div>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-1">
+            <div className="relative">
+              <button
+                onClick={() => setAlertOpen(!alertOpen)}
+                className="relative p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label="Notificações"
+              >
+                <Bell size={20} />
+                {alertData.count > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
+                    {alertData.count > 9 ? "9+" : alertData.count}
+                  </span>
+                )}
+              </button>
+
+              {alertOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setAlertOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                      <p className="text-sm font-semibold text-gray-800">Alertas de vencimento</p>
+                      <span className="text-xs text-gray-400">
+                        {alertData.count} título{alertData.count !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto">
+                      {alertData.items.length === 0 ? (
+                        <div className="py-8 text-center text-sm text-gray-400">
+                          Nenhum alerta ativo
+                        </div>
+                      ) : (
+                        alertData.items.map((item) => (
+                          <div
+                            key={`${item.tipo}-${item.id}`}
+                            className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-xs font-medium text-gray-800 truncate">{item.description}</p>
+                              <span
+                                className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                                  item.tipo === "PAGAR"
+                                    ? "bg-red-50 text-red-600"
+                                    : "bg-blue-50 text-blue-600"
+                                }`}
+                              >
+                                {item.tipo === "PAGAR" ? "A Pagar" : "A Receber"}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between mt-1">
+                              <p className="text-xs text-gray-500">
+                                Vence:{" "}
+                                {new Date(item.dueDate).toLocaleDateString("pt-BR")}
+                              </p>
+                              <p className="text-xs font-semibold tabular-nums text-gray-700">
+                                {item.amount.toLocaleString("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    {tenantSlug && (
+                      <div className="px-4 py-2.5 border-t border-gray-100">
+                        <Link
+                          href={`/cliente/${tenantSlug}/configuracoes/alertas`}
+                          onClick={() => setAlertOpen(false)}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Gerenciar alertas →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
-              className="relative p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
-              aria-label="Notificações"
+              className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label="Menu"
             >
-              <Bell size={20} />
+              <AlignJustify size={20} />
             </button>
           </div>
         </header>

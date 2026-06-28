@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import Link from "next/link";
-import { Users, Truck, Package, Warehouse, Tag, UserCog, ChevronRight } from "lucide-react";
+import { Users, Truck, Package, Warehouse, Tag, UserCog, Bell, ChevronRight } from "lucide-react";
 
 const modules = [
   { href: "/configuracoes/clientes", icon: Users, label: "Clientes", description: "Cadastro de clientes e tabelas de crédito", available: true },
@@ -9,6 +9,7 @@ const modules = [
   { href: "/configuracoes/produtos", icon: Package, label: "Produtos", description: "Catálogo de produtos, grupos e fabricantes", available: true },
   { href: "/configuracoes/depositos", icon: Warehouse, label: "Depósitos", description: "Locais de armazenamento e separação", available: true },
   { href: "/configuracoes/tabelas-preco", icon: Tag, label: "Tabelas de Preço", description: "Configuração de tabelas e política de preços", available: true },
+  { href: "/configuracoes/alertas", icon: Bell, label: "Alertas de Vencimento", description: "Regras de notificação para títulos próximos do vencimento", available: true },
   { href: "/configuracoes/usuarios", icon: UserCog, label: "Usuários", description: "Permissões e acessos dos colaboradores", available: false },
 ];
 
