@@ -96,6 +96,8 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes, 
   const [isPending, startTransition] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [receberOrder, setReceberOrder] = useState<OrderRow | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailOrder, setDetailOrder] = useState<OrderRow | null>(null);
 
   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -129,6 +131,11 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes, 
       createForm.reset(DEFAULT_CREATE);
       startTransition(() => router.refresh());
     } catch { toast.error("Erro ao criar ordem."); }
+  }
+
+  function openDetail(o: OrderRow) {
+    setDetailOrder(o);
+    setDetailOpen(true);
   }
 
   async function onDelete(id: string) {
@@ -224,7 +231,14 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes, 
                 const cfg = STATUS_CONFIG[o.status as keyof typeof STATUS_CONFIG];
                 return (
                   <TableRow key={o.id}>
-                    <TableCell className="font-mono text-sm font-medium">{o.number}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => openDetail(o)}
+                        className="font-mono text-sm font-medium text-[#0F5132] hover:underline underline-offset-2"
+                      >
+                        {o.number}
+                      </button>
+                    </TableCell>
                     <TableCell className="text-sm text-gray-500 whitespace-nowrap">
                       {new Date(o.issueDate).toLocaleDateString("pt-BR")}
                     </TableCell>
@@ -270,6 +284,124 @@ export function OrdensView({ orders, fornecedores, produtos, depositos, quotes, 
           </Table>
         </div>
       </div>
+
+      {/* Sheet — detalhes da ordem de compra */}
+      <Sheet open={detailOpen} onOpenChange={(o) => { if (!o) { setDetailOpen(false); setDetailOrder(null); } }}>
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+          {detailOrder && (
+            <div className="space-y-6">
+              <SheetHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <SheetTitle className="font-mono text-lg">{detailOrder.number}</SheetTitle>
+                  <Badge variant="outline" className={STATUS_CONFIG[detailOrder.status as keyof typeof STATUS_CONFIG]?.class}>
+                    {STATUS_CONFIG[detailOrder.status as keyof typeof STATUS_CONFIG]?.label}
+                  </Badge>
+                </div>
+              </SheetHeader>
+
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Fornecedor</p>
+                  <p className="font-medium text-gray-800">{detailOrder.supplierName}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Emissão</p>
+                  <p className="font-medium tabular-nums">{new Date(detailOrder.issueDate).toLocaleDateString("pt-BR")}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Previsão de entrega</p>
+                  <p className="font-medium tabular-nums">{detailOrder.expectedDate ? new Date(detailOrder.expectedDate).toLocaleDateString("pt-BR") : "—"}</p>
+                </div>
+                {detailOrder.paymentTerms && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-0.5">Condição de pagamento</p>
+                    <p className="font-medium">{detailOrder.paymentTerms}</p>
+                  </div>
+                )}
+                {detailOrder.nfNumber && (
+                  <>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-0.5">Número da NF</p>
+                      <p className="font-mono font-medium">{detailOrder.nfNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-0.5">Data da NF</p>
+                      <p className="font-medium tabular-nums">{detailOrder.nfDate ? new Date(detailOrder.nfDate).toLocaleDateString("pt-BR") : "—"}</p>
+                    </div>
+                    {detailOrder.nfAmount !== null && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-0.5">Valor da NF</p>
+                        <p className="font-medium tabular-nums">{fmt(detailOrder.nfAmount)}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-2">Itens da ordem</p>
+                <div className="rounded-lg border border-gray-200 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead className="text-xs">Produto</TableHead>
+                        <TableHead className="text-xs text-right">Qtd OC</TableHead>
+                        <TableHead className="text-xs text-right">Recebido</TableHead>
+                        <TableHead className="text-xs text-right">Custo unit.</TableHead>
+                        <TableHead className="text-xs text-right">Subtotal</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {detailOrder.items.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="text-xs">
+                            <p className="font-medium">{item.productName}</p>
+                            <p className="text-gray-400">{item.productUnit}</p>
+                          </TableCell>
+                          <TableCell className="text-xs text-right tabular-nums">
+                            {item.quantity.toLocaleString("pt-BR", { minimumFractionDigits: 3 })}
+                          </TableCell>
+                          <TableCell className="text-xs text-right tabular-nums text-gray-500">
+                            {item.receivedQty > 0 ? item.receivedQty.toLocaleString("pt-BR", { minimumFractionDigits: 3 }) : "—"}
+                          </TableCell>
+                          <TableCell className="text-xs text-right tabular-nums">{fmt(item.unitCost)}</TableCell>
+                          <TableCell className="text-xs text-right tabular-nums font-semibold">{fmt(item.totalCost)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 pt-4">
+                <div className="flex justify-between font-bold text-gray-900 text-base">
+                  <span>Total OC</span>
+                  <span className="tabular-nums">{fmt(detailOrder.totalAmount)}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                {detailOrder.status === "PENDING" && (
+                  <button
+                    onClick={() => { setDetailOpen(false); openReceberDialog(detailOrder); }}
+                    className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-[#0F5132] text-white hover:bg-[#0d4429] transition-colors"
+                  >
+                    <FileInput size={14} /> Receber NF
+                  </button>
+                )}
+                {detailOrder.status !== "RECEIVED" && (
+                  <button
+                    onClick={() => { onDelete(detailOrder.id); setDetailOpen(false); }}
+                    className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={14} /> Excluir
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* Sheet — nova OC manual */}
       <Sheet open={sheetOpen} onOpenChange={(o) => { if (!o) setSheetOpen(false); }}>

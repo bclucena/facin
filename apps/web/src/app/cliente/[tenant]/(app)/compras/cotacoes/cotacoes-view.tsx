@@ -68,6 +68,8 @@ export function CotacoesView({ quotes, fornecedores, produtos, tenantSlug }: { q
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailQuote, setDetailQuote] = useState<QuoteRow | null>(null);
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema) as Resolver<FormValues>, defaultValues: DEFAULT });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "items" });
@@ -118,6 +120,11 @@ export function CotacoesView({ quotes, fornecedores, produtos, tenantSlug }: { q
       toast.success("Cotação marcada como enviada");
       startTransition(() => router.refresh());
     } catch { toast.error("Erro."); }
+  }
+
+  function openDetail(q: QuoteRow) {
+    setDetailQuote(q);
+    setDetailOpen(true);
   }
 
   async function onConvert(id: string) {
@@ -171,7 +178,14 @@ export function CotacoesView({ quotes, fornecedores, produtos, tenantSlug }: { q
                 const cfg = STATUS_CONFIG[q.status as keyof typeof STATUS_CONFIG];
                 return (
                   <TableRow key={q.id}>
-                    <TableCell className="font-mono text-sm font-medium">{q.number}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => openDetail(q)}
+                        className="font-mono text-sm font-medium text-[#0F5132] hover:underline underline-offset-2"
+                      >
+                        {q.number}
+                      </button>
+                    </TableCell>
                     <TableCell className="text-sm text-gray-500 whitespace-nowrap">
                       {new Date(q.issueDate).toLocaleDateString("pt-BR")}
                     </TableCell>
@@ -219,6 +233,110 @@ export function CotacoesView({ quotes, fornecedores, produtos, tenantSlug }: { q
           </Table>
         </div>
       </div>
+
+      {/* Sheet — detalhes da cotação */}
+      <Sheet open={detailOpen} onOpenChange={(o) => { if (!o) { setDetailOpen(false); setDetailQuote(null); } }}>
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+          {detailQuote && (
+            <div className="space-y-6">
+              <SheetHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <SheetTitle className="font-mono text-lg">{detailQuote.number}</SheetTitle>
+                  <Badge variant="outline" className={STATUS_CONFIG[detailQuote.status as keyof typeof STATUS_CONFIG]?.class}>
+                    {STATUS_CONFIG[detailQuote.status as keyof typeof STATUS_CONFIG]?.label}
+                  </Badge>
+                </div>
+              </SheetHeader>
+
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Fornecedor</p>
+                  <p className="font-medium text-gray-800">{detailQuote.supplierName}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Emissão</p>
+                  <p className="font-medium tabular-nums">{new Date(detailQuote.issueDate).toLocaleDateString("pt-BR")}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Previsão de entrega</p>
+                  <p className="font-medium tabular-nums">{detailQuote.expectedDate ? new Date(detailQuote.expectedDate).toLocaleDateString("pt-BR") : "—"}</p>
+                </div>
+                {detailQuote.paymentTerms && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-0.5">Condição de pagamento</p>
+                    <p className="font-medium">{detailQuote.paymentTerms}</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-2">Itens da cotação</p>
+                <div className="rounded-lg border border-gray-200 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead className="text-xs">Produto</TableHead>
+                        <TableHead className="text-xs text-right">Qtd</TableHead>
+                        <TableHead className="text-xs text-right">Custo unit.</TableHead>
+                        <TableHead className="text-xs text-right">Subtotal</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {detailQuote.items.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="text-xs">
+                            <p className="font-medium">{item.productName}</p>
+                            <p className="text-gray-400">{item.productUnit}</p>
+                          </TableCell>
+                          <TableCell className="text-xs text-right tabular-nums">
+                            {item.quantity.toLocaleString("pt-BR", { minimumFractionDigits: 3 })}
+                          </TableCell>
+                          <TableCell className="text-xs text-right tabular-nums">{fmt(item.unitCost)}</TableCell>
+                          <TableCell className="text-xs text-right tabular-nums font-semibold">{fmt(item.totalCost)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 pt-4">
+                <div className="flex justify-between font-bold text-gray-900 text-base">
+                  <span>Total</span>
+                  <span className="tabular-nums">{fmt(detailQuote.totalAmount)}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                {detailQuote.status === "DRAFT" && (
+                  <button
+                    onClick={() => { onMarkSent(detailQuote.id); setDetailOpen(false); }}
+                    className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 transition-colors"
+                  >
+                    <Send size={14} /> Marcar enviada
+                  </button>
+                )}
+                {(detailQuote.status === "DRAFT" || detailQuote.status === "SENT") && (
+                  <button
+                    onClick={() => { onConvert(detailQuote.id); setDetailOpen(false); }}
+                    className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-[#0F5132] text-white hover:bg-[#0d4429] transition-colors"
+                  >
+                    <ArrowRightCircle size={14} /> Converter em OC
+                  </button>
+                )}
+                {detailQuote.status !== "CONVERTED" && (
+                  <button
+                    onClick={() => { onDelete(detailQuote.id); setDetailOpen(false); }}
+                    className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={14} /> Excluir
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* Sheet — nova cotação */}
       <Sheet open={sheetOpen} onOpenChange={(o) => { if (!o) setSheetOpen(false); }}>
